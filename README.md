@@ -6,10 +6,10 @@ Please install `Polkadot JS Extension` before you start. You can get it from her
 
 ### Get source code
 
-Please get the code from `https://github.com/RainbowcityFoundation/RainbowDAO-Protocol-Ink-UI-milestone_1.git`
+Please get the code from `https://github.com/RainbowcityFoundation/RainbowDAO-Protocol-Ink-UI-milestone_2.git`
 
 ```
-git clone https://github.com/RainbowcityFoundation/RainbowDAO-Protocol-Ink-UI-milestone_1.git
+git clone https://github.com/RainbowcityFoundation/RainbowDAO-Protocol-Ink-UI-milestone_2.git
 ```
 
 ## Project setup
@@ -72,4 +72,3 @@ https://www.rainbowdao.io/polkadot
 You can use `https://www.rainbowdao.io/polkadot` to create token/multisign wallet. Test Protocol Management.
 
 
- 
