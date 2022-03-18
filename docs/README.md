@@ -150,6 +150,19 @@ Please find the correct contract address in `src/api/connectContract.js `, and u
 
 erc20 > dao_category > dao_proposal > dao_setting > dao_users > dao_vault > template_manager  > dao_manager > dao_factory
 
+```js
+//Configuration required to run this site (https://www.rainbowdao.io/daoManage) config:
+//address ink => src/api/connectContract.js
+dao_factory => dao_factory
+//contractHash ink=> utils/contractHash
+erc20 => erc20_code_hash
+dao_proposal => dao_proposal
+dao_setting => dao_setting
+dao_users => dao_user
+dao_vault => dao_vault
+dao_manager => dao_manage
+```
+
 
 
 #### 2. Replace Hash 
