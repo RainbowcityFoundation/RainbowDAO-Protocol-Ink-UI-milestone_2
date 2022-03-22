@@ -32,7 +32,7 @@ const actions = {
         const AccountId = await Accounts.accountAddress();
         let data = await state.contract.query.queryInfo(AccountId, {value, gasLimit})
         data = formatResult(data);
-        console.log(coinAddress,data)
+
         return data
     },
     async getPriorVotes({rootState}, {blockNumber,coinAddress}) {
@@ -60,16 +60,16 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3,coinAddress)
-        let isSend = false
+
         let data = await state.contract.tx.approve( {value, gasLimit},address,"100000000000000000000000000000000").signAndSend(AccountId, { signer: injector.signer }, (result) => {
             dealResult(result,"Approve")
         });
-        console.log(data)
+
         data = formatResult(data);
         return data
     },
     async delegate({rootState},{address,coinAddress}){
-        console.log(address,coinAddress)
+
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3,coinAddress)
@@ -88,7 +88,7 @@ const actions = {
                 return true
             }
         });
-        console.log(data)
+
         data = formatResult(data);
         return data
     },
@@ -96,7 +96,7 @@ const actions = {
     async getBalance({rootState},address){
         await judgeContract(rootState.app.web3, address)
         const accountList = await Accounts.accountList();
-        let AccountId = accountList.allAccounts[0].address
+        const AccountId = sessionStorage.getItem('currentAccount')
         let data = await state.contract.query.balanceOf(AccountId, {value, gasLimit}, AccountId)
         data = formatResult(data);
         return data
@@ -104,7 +104,7 @@ const actions = {
     async getBalanceOf({rootState}, {address,toAddr}){
         await judgeContract(rootState.app.web3, address)
         const accountList = await Accounts.accountList();
-        let AccountId = accountList.allAccounts[0].address
+        const AccountId = sessionStorage.getItem('currentAccount')
         let data = await state.contract.query.balanceOf(AccountId, {value, gasLimit}, toAddr)
         data = formatResult(data);
         return data

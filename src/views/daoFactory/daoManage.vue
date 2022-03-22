@@ -1,6 +1,6 @@
 <template>
   <div class="daoManage">
-    <dao-nav></dao-nav>
+    <dao-nav/>
 
     <div class="dao-manage-content">
       <daoHeaderInfo @joinDao="joinDao"></daoHeaderInfo>
@@ -166,14 +166,12 @@ export default {
       this.$store.commit("daoManage/SET_CURDAOADDR",item.daoManagerAddr)
       this.getComponentAddrs()
       this.$store.dispatch("app/getBalance", this.curDaoAddress).then(balance => {
-        console.log(balance)
         this.balance = balance
       })
     },
     getCoinInfo() {
       if(this.curDaoControlAddress.erc20Addr){
         this.$store.dispatch("erc20/queryInfo", this.curDaoControlAddress.erc20Addr).then(res => {
-          console.log(res)
           this.$store.commit("erc20/SET_COIN",res)
         })
       }
@@ -184,7 +182,6 @@ export default {
     getProposalList() {
       if (this.isConnected && this.curDaoControlAddress) {
         this.$store.dispatch("daoProposal/listProposals", this.curDaoControlAddress.proposalAddr).then(async res => {
-          console.log(res)
           for (let i = 0; i < res.length; i++) {
             await this.$store.dispatch("daoProposal/state", {
               proposalId: res[i].proposalId,
@@ -203,7 +200,6 @@ export default {
         res.forEach(async item=>{
           let addrObj = await this.getDaoControlAddr(item.daoManagerAddr)
           let category = await this.getDaoCategory(item.daoManagerAddr)
-          console.log(category)
           if(addrObj.baseAddr){
             let daoInfo = await this.getDaoBaseInfo(addrObj.baseAddr)
             item.logo = daoInfo.logo
@@ -213,7 +209,7 @@ export default {
             item.category = category
           }
         })
-        console.log(res)
+
         this.daoList = res
 
       })
@@ -246,8 +242,11 @@ export default {
 
 <style lang="scss" scoped>
 .daoManage {
-
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   .dao-manage-content {
+    flex: 1;
     position: relative;
     margin-top: -100px;
     z-index: 1;

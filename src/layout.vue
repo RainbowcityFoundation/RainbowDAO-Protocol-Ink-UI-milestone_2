@@ -76,8 +76,58 @@ export default {
     line-height: 37px;
   }
 }
-
-
+::v-deep .rainbow-dialog-box{
+  position: fixed;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  z-index: 101;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .mask{
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.50);
+  }
+  .rainbow-dialog{
+    position: absolute;
+    z-index: 102;
+    background: #fff;
+    border-radius: 20px;
+    padding: 40px;
+    .dialog-title{
+      font-size: 30px;
+      font-weight: bold;
+      padding-bottom: 30px;
+    }
+  }
+}
+::v-deep .rainbow-btn{
+  text-align: center;
+  width: 160px;
+  height: 40px;
+  background: linear-gradient(90deg,#12c2e9 0%, #c471ed 64%, #f64f59 100%);
+  border: 1px solid #eaeaea;
+  border-radius: 10px;
+  line-height: 40px;
+  margin-top: 20px;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  &:active{
+    transform: translate(2px, 2px);
+  }
+}
+::v-deep .rainbow-btn{
+  transition: 0.2s;
+  transform: translate(0,0);
+  user-select: none;
+  &:active{
+    transform: translate(3px,3px);
+  }
+}
 .layout {
   background: #10101B;
   ::v-deep .rainbow-nav-box{
@@ -143,5 +193,94 @@ export default {
   }
 
 
+  ::v-deep .page-header {
+    width: 900px;
+    margin: 20px auto 0px;
+    display: flex;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+
+    .page-header-img {
+      width: 110px;
+    }
+
+    .page-header-index {
+      display: block;
+      font: 900 70px 'Concert One', sans-serif;
+      text-transform: uppercase;
+      color: transparent;
+      -webkit-text-stroke: 1px #fff;
+      animation: glow 20s ease-in-out infinite;
+    }
+
+    .page-header-name {
+      font: 900 50px 'Concert One', sans-serif;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #12c2e9 0%, #c471ed 64%, #f64f59 100%);
+      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text;
+    }
+
+    .page-header-title {
+      text-transform: uppercase;
+      margin-top: 10px;
+      width: 680px;
+      font-size: 28px;
+      font-weight: bold;
+      text-align: justify;
+      line-height: 35px;
+      margin-left: 40px;
+    }
+  }
+
+  ::v-deep .page-content {
+    width: 900px;
+    padding: 0 100px;
+    margin: 0px auto;
+    font-size: 16px;
+    text-align: justify;
+    color: #ffffff;
+    line-height: 30px;
+    box-sizing: content-box;
+
+    p {
+      margin-top: 20px;
+    }
+  }
+  ::v-deep .dao-list{
+    display: flex;
+    flex-wrap: wrap;
+    .item{
+      margin: 16px;
+      display: flex;
+      width: 252px;
+      height: 80px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 10px;
+      align-items: center;
+      cursor: pointer;
+
+      .dao-info{
+        padding-left: 10px;
+        .name{
+          word-break: break-all;
+          font-weight: bold;
+        }
+        .address{
+          word-break: break-all;
+
+        }
+        .members{
+          color: #666;
+        }
+      }
+      .logo{
+        img{
+          width: 50px;
+        }
+      }
+    }
+  }
 }
 </style>

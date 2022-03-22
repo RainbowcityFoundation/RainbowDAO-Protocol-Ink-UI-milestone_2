@@ -4,6 +4,10 @@
     <div class="nav-box">
       <img class="logo" src="../assets/imgs/RainbowDAOLogo.png" @click="$router.push('/')"/>
       <ul class="navbar-nav">
+        <li :class="{'active':$route.name=='ETHDanver2022'}" @click="openNew('/ETHDanver2022')">
+          <span class="w-font">ETHDanver2022</span>
+          <span class="re-active" >ETHDanver2022</span>
+        </li>
         <li :class="{'active':$route.name=='NearMetaBUILD'}" @click="openNew('/NearMetaBUILD')">
           <span class="w-font">NearMetaBUILD</span>
           <span class="re-active" >NearMetaBUILD</span>
@@ -20,8 +24,6 @@
           <span class="w-font">Contact us</span>
           <span class="re-active" >Contact us</span>
         </li>
-
-
       </ul>
     </div>
   </div>

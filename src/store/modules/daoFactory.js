@@ -29,6 +29,7 @@ const actions = {
     },
     async listDao({rootState}) {
         const AccountId = await Accounts.accountAddress();
+
         await judgeContract(rootState.app.web3)
         let data = await state.contract.query.listDao(AccountId, {value, gasLimit})
         data = formatResult(data);

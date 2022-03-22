@@ -120,7 +120,7 @@
 
 <script>
 
-import {mapGetters} from "vuex";
+import {mapGetters} from "_vuex@3.6.2@vuex";
 
 export default {
   name: "daoFinance",

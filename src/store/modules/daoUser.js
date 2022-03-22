@@ -63,7 +63,8 @@ const actions = {
     },
     async join({rootState, dispatch}, address) {
         const injector = await Accounts.accountInjector();
-        const AccountId = await Accounts.accountAddress();
+
+        const AccountId = sessionStorage.getItem('currentAccount')
 
         await judgeContract(rootState.app.web3, address)
         if (rootState.app.balance < 1.01) {
