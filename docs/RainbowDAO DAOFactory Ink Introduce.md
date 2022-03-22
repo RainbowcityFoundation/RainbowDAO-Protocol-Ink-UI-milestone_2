@@ -2,11 +2,15 @@
 
 ###  1、To get gas   
 
+Set Node `wss://pot.rainbow.kim`
+
+![transferToAccount](./introImgs/chooseChain.jpg)
+
 ##### Get gas from ALICE
 
 In `https://polkadot.js.org/apps` Account page, use account send gas to your extension account.
 
-![transferToAccount](.\transferToAccount.jpg)
+![transferToAccount](./introImgs/transferToAccount.jpg)
 
 ### 2、Test DAOFactory
 
