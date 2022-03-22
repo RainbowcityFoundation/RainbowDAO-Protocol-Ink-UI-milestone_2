@@ -6,13 +6,18 @@ Vue.use(VueRouter)
 const routes = [
     {
         path: '/',
-        name: "daoManage",
-        component:()=> import('@/views/daoFactory/daoManage.vue')
+        name: "home",
+        component: () => import('@/home.vue'),
     },
     {
         path: '/NearMetaBUILD',
         name: "NearMetaBUILD",
         component: () => import('@/views/nearHackathon.vue'),
+    },
+    {
+        path: '/ETHDanver2022',
+        name: "ETHDanver2022",
+        component: () => import('@/views/ETHDenver.vue'),
     },
     {
         path: '/',
@@ -47,7 +52,11 @@ const routes = [
                 name: "management",
                 component:()=> import('@/views/manage/management.vue')
             },
-
+            {
+                path: '/RainbowWarrior',
+                name: "RainbowWarrior",
+                component:()=> import('@/views/rainbowWarrior/rainbowWarriorPage')
+            },
             {
                 path: '/createProposal',
                 name: "createProposal",
@@ -62,6 +71,11 @@ const routes = [
                 path: '/ProposalDetail',
                 name: "ProposalDetail",
                 component:()=> import('@/views/proposal/proposalDetail.vue')
+            },
+            {
+                path: '/index',
+                name: "index",
+                component:()=> import('@/views/rainbowDao/rainbowDao.vue')
             },
             {
                 path: '/income',
@@ -138,7 +152,11 @@ const routes = [
                 name: "mineDao",
                 component:()=> import('@/views/daoFactory/mineDao.vue')
             },
-
+            {
+                path: '/bitCity',
+                name: "bitCity",
+                component:()=> import('@/bitCity.vue')
+            },
             {
                 path: '/connectMe',
                 name: "connectMe",

@@ -154,7 +154,7 @@ erc20 > dao_category > dao_proposal > dao_setting > dao_users > dao_vault > temp
 //Configuration required to run this site (https://www.rainbowdao.io/daoManage) config:
 //address ink => src/api/connectContract.js
 dao_factory => dao_factory
-//contractHash ink=> utils/contractHash
+//contractHash ink=> utils/contractHash.json
 erc20 => erc20_code_hash
 dao_proposal => dao_proposal
 dao_setting => dao_setting
@@ -208,7 +208,4 @@ In `https://polkadot.js.org/apps` Account page, use account  send gas to your ex
 
 ##### Then
 
-You can use `https://www.rainbowdao.io/polkadot` to create token/multisign wallet.  Test  Protocol Management.
-
-
-
+You can use `https://www.rainbowdao.io/polkadot`.  Test  Protocol Management.

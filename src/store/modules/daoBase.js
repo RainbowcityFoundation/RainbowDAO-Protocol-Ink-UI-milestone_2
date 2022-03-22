@@ -22,8 +22,7 @@ const mutations = {
 const actions = {
 
     async getBaseInfo({rootState},baseAddress) {
-        console.log(baseAddress)
-        const AccountId = await Accounts.accountAddress();
+        const AccountId = sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3,baseAddress)
         let data = await state.contract.query.getBaseInfo(AccountId, {value, gasLimit})
         data = formatResult(data);
