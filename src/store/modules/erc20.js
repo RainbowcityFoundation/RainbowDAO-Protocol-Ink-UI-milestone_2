@@ -25,7 +25,9 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const txHash = await rootState.app.web3.tx.balances
             .transfer(toAddr, amount)
-            .signAndSend(fromAddr, { signer: injector.signer });
+            .signAndSend(fromAddr, { signer: injector.signer }, (result) => {
+                dealResult(result,"Transfer Fee")
+            });
     },
     async queryInfo({rootState}, coinAddress) {
         await judgeContract(rootState.app.web3,coinAddress)
@@ -58,7 +60,7 @@ const actions = {
     },
     async approve({rootState},{address,coinAddress}){
         const injector = await Accounts.accountInjector();
-        const AccountId = await Accounts.accountAddress();
+        const AccountId =  sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3,coinAddress)
 
         let data = await state.contract.tx.approve( {value, gasLimit},address,"100000000000000000000000000000000").signAndSend(AccountId, { signer: injector.signer }, (result) => {
@@ -71,7 +73,7 @@ const actions = {
     async delegate({rootState},{address,coinAddress}){
 
         const injector = await Accounts.accountInjector();
-        const AccountId = await Accounts.accountAddress();
+        const AccountId =  sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3,coinAddress)
         let isSend = false
         let data = await state.contract.tx.delegate( {value, gasLimit},address).signAndSend(AccountId, { signer: injector.signer }, (result) => {
