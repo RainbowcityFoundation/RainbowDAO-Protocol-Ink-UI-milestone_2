@@ -13,7 +13,7 @@
               1
             </div>
             <div class="stage-title">
-              Init Dao
+              Init DAO
             </div>
           </div>
           <div class="stage-content" v-show="stage==0">
@@ -24,8 +24,8 @@
                 </div>
                 <div class="select-box" v-if="selectIndex!=2">
                   <select v-model="selectIndex" @change="getSelected">
-                    <option selected value="0"> mother</option>
-                    <option value="1"> union</option>
+                    <option selected value="0"> mother DAO </option>
+                    <option value="1"> alliance DAO</option>
                   </select>
                 </div>
                 <div v-if="selectIndex==2">
@@ -59,14 +59,6 @@
                   <input type="text" v-model="daoInfo.name" placeholder="Enter">
                 </div>
               </div>
-              <!--              <div class="item">-->
-              <!--                <div class="name">-->
-              <!--                  DAO Symbol-->
-              <!--                </div>-->
-              <!--                <div class="input">-->
-              <!--                  <input type="text" v-model="daoInfo.symbol" placeholder="Enter">-->
-              <!--                </div>-->
-              <!--              </div>-->
               <div class="item">
                 <div class="name">
                   DAO Logo
@@ -84,7 +76,10 @@
                 </div>
               </div>
               <div class="btn-box">
-                <div class="sub-btn" @click="next">
+                <div class="sub-btn" @click="bindMotherDao" v-if="category=='child'">
+                  Binding the mother DAO
+                </div>
+                <div class="sub-btn" @click="next" style="margin-left: 20px" v-if="isBindMotherDao || category!='child'">
                   Next
                 </div>
               </div>
@@ -185,11 +180,13 @@
 <script>
 
 import {mapGetters} from "vuex";
+import {eventBus} from "../../utils/eventBus";
 
 export default {
   name: "createDao",
   data() {
     return {
+      isBindMotherDao:false,
       daoAddress: "",
       count: 1,
       stage: 0,
@@ -197,7 +194,7 @@ export default {
       daoInfo: {
         name: '', logo: '', desc: ''
       },
-      selectIndex: 0,
+      selectIndex: "0",
       category: "mother",
       tokenInfo: {
         tokenName: "",
@@ -208,9 +205,14 @@ export default {
     }
   },
   created() {
-    console.log(this.$route.params.index)
     if (this.$route.params) {
-      this.selectIndex = this.$route.params.index
+      if( this.$route.params.index > 0){
+        this.selectIndex = this.$route.params.index
+        this.getSelected(this.$route.params.index)
+        if(this.selectIndex==2){
+          this.category="child"
+        }
+      }
     }
 
   },
@@ -232,6 +234,35 @@ export default {
       }
     },
     initBase() {
+      const {tokenName, symbol, decimals, totalSupply} = this.tokenInfo
+      if (!tokenName) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the name"
+        })
+        return
+      }
+      if (!symbol) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the symbol"
+        })
+        return
+      }
+      if (!decimals || decimals == 0) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the decimals and decimals not 0"
+        })
+        return
+      }
+      if (!totalSupply || totalSupply == 0) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the totalSupply and totalSupply not 0"
+        })
+        return
+      }
       this.$store.dispatch("erc20/transfer", {
         fromAddr: this.account,
         amount: 8000 * 10 ** 12,
@@ -253,7 +284,6 @@ export default {
       await this.$store.dispatch("daoFactory/getDaoByIndex", index).then(res => {
         console.log(res.daoManagerAddr)
         this.daoAddress = res.daoManagerAddr
-
       })
     },
     async getDaosByOwner() {
@@ -262,14 +292,15 @@ export default {
         await this.getDaoByIndex(res[res.length - 1])
         if (this.stage < 1) {
           this.stage = 1
-          if (this.selectIndex == 2) {
-            console.log("Create child Dao")
-            this.$store.dispatch("daoManage/createChildDao", {
-              childAddr: this.daoAddress,
-              address: this.$store.state.daoManage.curDaoAddress
-            })
-          }
+
         }
+      })
+    },
+    bindMotherDao(){
+      this.isBindMotherDao = true
+      this.$store.dispatch("daoManage/createChildDao", {
+        childAddr: this.daoAddress,
+        address: this.$store.state.daoManage.curDaoAddress
       })
     },
     initDao() {
@@ -277,7 +308,6 @@ export default {
 
       this.$store.dispatch("daoFactory/initDaoByTemplate", {category: this.category}).then(() => {
         this.$eventBus.$on('message', (message) => {
-
           if (message.type == "success" && message.message == "Init DAO Success") {
             _this.getDaosByOwner()
             _this.$eventBus.$on('message', null)
@@ -297,15 +327,18 @@ export default {
     },
     createDao() {
       this.tokenInfo.owner = this.account
+
       let params = {
         base: this.daoInfo,
         erc20: this.tokenInfo
       }
+      const decimalLength = (10**params.erc20.decimals).toString()
+      params.erc20.totalSupply = params.erc20.totalSupply + decimalLength.substr(1,decimalLength.length-1)
+      console.log(params.erc20.totalSupply)
       let _this = this
       this.$store.dispatch("daoManage/initByParams", {address: this.daoAddress, params}).then(() => {
         this.$eventBus.$on('message', (message) => {
           if (message.type == "success" && message.message == "Init DAO Info Success") {
-            console.log(message)
             _this.$eventBus.$on('message', null)
             this.$router.push({name: "daoManage"})
           }
@@ -347,11 +380,12 @@ export default {
 
     .stage-list {
       .list-item {
-        .tip{
+        .tip {
           line-height: 45px;
           font-weight: bold;
           font-size: 16px;
         }
+
         &:last-child {
           .stage-content::after {
             visibility: hidden;

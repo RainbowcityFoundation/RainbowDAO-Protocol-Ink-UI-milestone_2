@@ -2,7 +2,7 @@
   <div class="mine-dao-box">
     <dao-nav></dao-nav>
     <div class="mine-dao">
-      <div class="dao-list">
+      <div class="dao-list" v-if="daoList.length>0">
         <div class="item" v-if="item.name" @click="chooseDao(item)" v-for="(item,index) in daoList" :key="index">
           <div class="logo">
             <img :src="item.logo" alt="">
@@ -39,6 +39,9 @@ export default {
   watch: {
     isConnected() {
       this.getData()
+    },
+    account(){
+      this.getData()
     }
   },
   created() {
@@ -54,8 +57,10 @@ export default {
     chooseDao(item) {
       this.$router.push({
         name: "daoManage", params: {
-          ...item,
-          isOwner: true
+          mineDAO:{
+            ...item,
+            isOwner: true
+          }
         }
       })
     },
@@ -67,8 +72,7 @@ export default {
     },
     getDaoByIndex(index) {
       this.$store.dispatch("daoFactory/getDaoByIndex", index).then(async res => {
-        console.log(res)
-        console.log(category)
+
         let addrObj = await this.getDaoControlAddr(res.daoManagerAddr)
         let category = await this.getDaoCategory(res.daoManagerAddr)
         res.category = category
@@ -90,22 +94,18 @@ export default {
       return await this.$store.dispatch("daoManage/getDaoCategory", addr)
     },
     getDaosByOwner() {
+      this.daoList = []
       this.$store.dispatch("daoFactory/getDaosByOwner").then(res => {
-        console.log(res)
         this.daoIndexList = res
         if (res) {
           res.forEach(async (idx,index) => {
-            console.log(idx)
             this.getDaoByIndex(idx)
-
           })
         }
-
 
       })
     },
     getData() {
-      console.log(this.isConnected)
       if (this.isConnected) {
         this.getDaosByOwner()
       }
@@ -136,7 +136,8 @@ export default {
 .dao-list {
   display: flex;
   flex-wrap: wrap;
-
+  margin-top: 20px;
+  box-shadow: none!important;
   .item {
     margin: 20px;
     display: flex;

@@ -45,7 +45,7 @@ export default {
   position: fixed;
   right: 20px;
   top: 60px;
-  z-index: 10;
+  z-index: 1000;
   .message{
     margin-top: 10px;
     width: 300px;

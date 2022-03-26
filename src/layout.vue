@@ -248,6 +248,11 @@ export default {
     }
   }
   ::v-deep .dao-list{
+    min-height: 100px;
+    max-height: 600px;
+    overflow: auto;
+    padding: 10px 0;
+    box-shadow: 0 0 10px #eee inset ;
     display: flex;
     flex-wrap: wrap;
     .item{
@@ -260,7 +265,10 @@ export default {
       padding: 10px;
       align-items: center;
       cursor: pointer;
-
+      &.active{
+        box-shadow: 0 0 10px #666 ;
+        border: 1px solid #666;
+      }
       .dao-info{
         padding-left: 10px;
         .name{

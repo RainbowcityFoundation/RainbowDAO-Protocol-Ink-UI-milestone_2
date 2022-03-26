@@ -5,7 +5,8 @@ import {eventBus} from "../../utils/eventBus"
 
 const state = {
     web3: {},
-    contract: null
+    contract: null,
+    proposalList:[]
 }
 const value = 0;
 const gasLimit = -1;
@@ -17,7 +18,10 @@ async function judgeContract(web3, address) {
 const mutations = {
     SET_WEB3(state, web3) {
         state.web3 = web3
-    }
+    },
+    SET_PROPOSALLIST(state, list) {
+        state.proposalList = list
+    },
 }
 const actions = {
     async listUser({rootState}, daoUserAddress) {
@@ -27,7 +31,7 @@ const actions = {
         data = formatResult(data);
         return data
     },
-    async propose({rootState, dispatch}, {address,title,desc,category,transaction,publicityDelay}) {
+    async propose({rootState, dispatch}, {address,title,desc,category,transaction,pendingTime,publicityDelay}) {
         const injector = await Accounts.accountInjector();
         const AccountId = sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3, address)
@@ -42,14 +46,17 @@ const actions = {
 
         const lastHeader = await rootState.app.web3.rpc.chain.getHeader();
         startBlock = lastHeader.number
-        startBlock= parseInt(startBlock) + 10
-        const endBlock = parseInt(startBlock) + 10000
+        startBlock= parseInt(startBlock) + parseInt(pendingTime)
+        const endBlock = parseInt(startBlock) + parseInt(pendingTime) + parseInt(publicityDelay)
 
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+        console.log(startBlock,endBlock,transaction,publicityDelay)
         let data = await state.contract.tx.propose({
             value,
             gasLimit
         },title,desc,category,startBlock,endBlock,transaction,publicityDelay).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result, "Create Proposal")
+            dealResult(result, "Create Proposal",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -80,9 +87,11 @@ const actions = {
             return
         }
         const AccountId = sessionStorage.getItem('currentAccount')
-
-        let data = await state.contract.tx.castVote({value, gasLimit},proposal_id,true).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result)
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+        console.log(proposal_id,support)
+        let data = await state.contract.tx.castVote({value, gasLimit},proposal_id,support).signAndSend(AccountId, { signer: injector.signer }, (result) => {
+            dealResult(result,"Vote",timeMemory)
         });
         data = formatResult(data);
         return data

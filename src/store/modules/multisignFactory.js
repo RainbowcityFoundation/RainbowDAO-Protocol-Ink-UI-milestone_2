@@ -43,10 +43,10 @@ const actions = {
         owners?'':owners = [AccountId]
         let ownersarr = [...owners]
         min_sign_count>0?'':min_sign_count=1
-
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.newMultisig( {value, gasLimit},multisig_hash, ownersarr,min_sign_count).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            console.error(result)
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data

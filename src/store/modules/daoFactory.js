@@ -5,7 +5,8 @@ import contractHash from "../../utils/contractHash.json"
 import {eventBus} from "../../utils/eventBus";
 const state = {
     web3:{},
-    contract:null
+    contract:null,
+    daoList:[]
 }
 const value = 0;
 const gasLimit = -1;
@@ -17,6 +18,9 @@ async function  judgeContract(web3){
 const mutations = {
     SET_WEB3(state,web3){
         state.web3 = web3
+    },
+    SET_DAOLIST(state,daoList){
+        state.daoList = daoList
     }
 }
 const actions = {
@@ -43,7 +47,7 @@ const actions = {
         return data
     },
     async getDaosByOwner({rootState}) {
-        const AccountId = await Accounts.accountAddress();
+        const AccountId = sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3)
         let data = await state.contract.query.getDaosByOwner(AccountId, {value, gasLimit})
         data = formatResult(data);
@@ -51,7 +55,7 @@ const actions = {
     },
     async initDaoByTemplate({rootState}, {category}){
         const injector = await Accounts.accountInjector();
-        const AccountId = await Accounts.accountAddress();
+        const AccountId = sessionStorage.getItem('currentAccount')
 
         let dao_manager_code_hash= contractHash["dao_manage"]
         let controller = AccountId
@@ -65,12 +69,12 @@ const actions = {
             })
             return
         }
-        console.log("initDAO")
-        console.log(state.contract.tx.initDaoByTemplate)
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         // Invalid params: unknown field `storageDepositLimit`, expected one of `origin`, `dest`, `value`, `gasLimit`, `inputData`.
         let data = await state.contract.tx.initDaoByTemplate({value, gasLimit},dao_manager_code_hash,controller,controller_type,category).signAndSend(AccountId, { signer: injector.signer }, (result) => {
             console.error(result)
-            dealResult(result,"Init DAO")
+            dealResult(result,"Init DAO",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -78,13 +82,7 @@ const actions = {
     async getContractAddr({rootState},name){
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3)
-        if(rootState.app.balance < 1.01){
-            eventBus.$emit('message', {
-                type:"error",
-                message:"Not enough gas"
-            })
-            return
-        }
+
         let data = await state.contract.query.getContractAddr(AccountId, {value, gasLimit},name)
         data = formatResult(data);
         return data

@@ -43,7 +43,11 @@
 <script>
 export default {
   name: "daoMember",
-  props:["membersList"]
+  computed:{
+    membersList(){
+      return this.$store.state.daoManage.daoMembers
+    }
+  }
 }
 </script>
 

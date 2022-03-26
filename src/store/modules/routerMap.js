@@ -40,12 +40,13 @@ const actions = {
             })
             return
         }
-
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.addRoute({
             value,
             gasLimit
         }, name, address).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data

@@ -36,12 +36,17 @@ const accountAddress = async () =>{
         console.error("!!!!! No wallet extention detected!!");
         // return;
     }
-    const Accounts = JSON.parse(sessionStorage.getItem('account'));
+    let Accounts
+    if(sessionStorage.getItem('account')){
+        Accounts  = JSON.parse(sessionStorage.getItem('account'));
+    }
     if (Accounts && Accounts.length > 0) {
         accountAddress = Accounts[0].address;
     } else {
         let accounts = await accountList
-        accountAddress = accounts.allAccounts[0].address;
+        if(accounts.allAccounts){
+            accountAddress = accounts.allAccounts[0].address;
+        }
 
     }
     return accountAddress;

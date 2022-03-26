@@ -1,16 +1,16 @@
 <template>
   <div class="dao-home">
-    <div class="balance" v-show="balance">
+    <div class="balance" v-show="daoGCBalance">
       <div class="sub-title">
         <img src="@/assets/daoImgs/title_icon1.png" alt="">
         BALANCE
       </div>
       <div class="number">
-        <strong>{{ balance }}</strong>
-        {{ coinInfo.name }}
+        <strong>{{ daoGCBalance ? parseInt(daoGCBalance.replace(/,/g, '')) / 10 ** parseInt(coinInfo.decimals) : 0 }}</strong>
+        {{coinInfo.name}}
       </div>
       <div class="address">
-        {{ daoAddress }}
+        {{ curDaoAddress }}
       </div>
     </div>
     <div class="part-title-box">
@@ -24,13 +24,23 @@
         </div>
       </div>
       <div class="right">
-        <div class="rainbow-btn" @click="createDao(0)">
+        <div class="search-box">
+          <input type="text" v-model="searchData.all" placeholder="Search">
+          <img v-show="searchData.all&&searchData.all.length>0" @click="searchData.all='',getSearchResult('all')" class="clear-btn" src="../../../assets/daoImgs/close.png" alt="">
+
+          <div class="rainbow-button search-btn" style="width: 46px;height: 36px" @click="getSearchResult('all')">
+            🔍
+          </div>
+        </div>
+        <div class="rainbow-button" @click="createDao(0)">
           CREATE
         </div>
       </div>
     </div>
     <div class="dao-list">
-      <div class="item" v-if="item.name" @click="chooseDao(item)" v-for="(item,index) in daoList" :key="index">
+      <div class="item" :class="{'active': item.daoManagerAddr == curDaoAddress}" v-if="item.name"
+           @click="chooseDao(item)" v-show="!allSearchName ||  item.name.indexOf(allSearchName) > -1"
+           v-for="(item,index) in daoList" :key="index">
         <div class="logo">
           <img :src="item.logo" alt="">
         </div>
@@ -44,24 +54,78 @@
         </div>
       </div>
     </div>
+
     <div class="part-title-box">
       <div class="left">
         <img src="../../../assets/daoImgs/title_icon1.png" alt="">
         <div class="part-title-name">
-          ALLIANCE
+          MOTHER DAO
         </div>
         <div class="part-title-tip">
 
         </div>
       </div>
       <div class="right">
-        <div class="rainbow-btn" @click="createDao(1)">
+        <div class="search-box">
+          <input type="text" v-model="searchData.mother" placeholder="Search">
+          <img v-show="searchData.mother&&searchData.mother.length>0" @click="searchData.mother='',getSearchResult('mother')" class="clear-btn" src="../../../assets/daoImgs/close.png" alt="">
+
+          <div class="rainbow-button search-btn" style="width: 46px;height: 36px" @click="getSearchResult('mother')">
+            🔍
+          </div>
+        </div>
+        <div class="rainbow-button" @click="createDao(0)">
           CREATE
         </div>
       </div>
     </div>
     <div class="dao-list">
-      <div class="item" v-if="item.category=='union' && item.name"  @click="chooseDepartment(item,index)" v-for="(item,index) in daoList" :key="index">
+      <div class="item" :class="{'active': item.daoManagerAddr == curDaoAddress}"
+           v-if="item.category=='mother' && item.name"
+           @click="chooseDao(item)" v-show="!motherSearchName || item.name.indexOf(motherSearchName)>-1"
+           v-for="(item,index) in daoList" :key="index">
+        <div class="logo">
+          <img :src="item.logo" alt="">
+        </div>
+        <div class="dao-info">
+          <div class="name">
+            {{ item.name }}
+          </div>
+          <div class="address">
+            {{ item.daoManagerAddr }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="part-title-box">
+      <div class="left">
+        <img src="../../../assets/daoImgs/title_icon1.png" alt="">
+        <div class="part-title-name">
+          ALLIANCE DAO
+        </div>
+        <div class="part-title-tip">
+
+        </div>
+      </div>
+      <div class="right">
+        <div class="search-box">
+          <input type="text" v-model="searchData.alliance" placeholder="Search">
+          <img v-show="searchData.alliance&&searchData.alliance.length>0" @click="searchData.alliance='',getSearchResult('alliance')" class="clear-btn" src="../../../assets/daoImgs/close.png" alt="">
+          <div class="rainbow-button search-btn" style="width: 46px;height: 36px" @click="getSearchResult('alliance')">
+            🔍
+          </div>
+        </div>
+        <div class="rainbow-button" @click="createDao(1)">
+          CREATE
+        </div>
+      </div>
+    </div>
+    <div class="dao-list">
+      <div class="item" :class="{'active': item.daoManagerAddr == curDaoAddress}"
+           v-if="item.category=='union' && item.name" @click="chooseDao(item,index)" v-for="(item,index) in daoList"
+           v-show="!allianceSearchName ||  item.name.indexOf(allianceSearchName) >-1"
+           :key="index">
         <div class="logo">
           <img :src="item.logo" alt="">
         </div>
@@ -86,22 +150,23 @@
         </div>
       </div>
       <div class="right" v-show="curDaoAddress">
-        <div class="rainbow-btn" @click="createDao(2)">
+        <div class="rainbow-btn" @click="createDao(2)" v-if="curdao.category == 'mother'">
           CREATE
         </div>
       </div>
     </div>
     <div class="dao-list">
-      <div class="item" @click="chooseDepartment(item,index)" v-for="(item,index) in childDaoList" :key="index">
+      <div class="item" :class="{'active': item.daoManagerAddr == curDaoAddress}" @click="chooseChildDao(item,index)"
+           v-for="(item,index) in childDaoList" :key="index">
         <div class="logo">
           <img :src="item.logo" alt="">
         </div>
         <div class="dao-info">
-          <!--          <div class="name">-->
-          <!--            {{ item }}-->
-          <!--          </div>-->
+          <div class="name">
+            {{ item.name }}
+          </div>
           <div class="address">
-            {{ item }}
+            {{ item.daoManagerAddr }}
           </div>
         </div>
       </div>
@@ -220,19 +285,29 @@
               <div class="input-box-title">
                 DEPARTMENT Join Directly
               </div>
-              <input type="text" v-model="department.joinDirectly" placeholder="join_directly">
+              <div class="select-box">
+                <select v-model="department.joinDirectly">
+                  <option selected value="true"> Directly to join</option>
+                  <option value="false"> Don't join directly</option>
+                </select>
+              </div>
             </div>
             <div class="input-box">
               <div class="input-box-title">
                 DEPARTMENT Is Open
               </div>
-              <input type="text" v-model="department.isOpen" placeholder="is_open">
+              <div class="select-box">
+                <select v-model="department.isOpen">
+                  <option selected value="true"> open</option>
+                  <option value="false"> not open</option>
+                </select>
+              </div>
             </div>
             <div class="input-box">
               <div class="input-box-title">
                 DEPARTMENT Manager
               </div>
-              <input type="text" v-model="department.manager" placeholder="manager">
+              <input type="text" v-model="department.manager" placeholder="manager Address">
             </div>
           </div>
           <div class="rainbow-btn" @click="addGroup">
@@ -245,17 +320,28 @@
 </template>
 
 <script>
-import {mapGetters} from "_vuex@3.6.2@vuex";
+import {mapGetters} from "vuex";
+import {eventBus} from "../../../utils/eventBus";
 
 export default {
   name: "daoHome",
-  props: ["daoList", "balance", "daoAddress", "curDaoControlAddress"],
+  props: ["daoList", "balance"],
   data() {
     return {
       balance: 0,
-      departmentList: [],
-      department: {},
-      isShowAddDepartment: false
+      searchData: {
+        mother: "",
+        all: "",
+        alliance: ""
+      },
+      allSearchName: "",
+      motherSearchName: "",
+      allianceSearchName: "",
+      department: {
+        isOpen: "true"
+      },
+      isShowAddDepartment: false,
+
     }
   },
 
@@ -264,6 +350,25 @@ export default {
       'isConnected',
       'account'
     ]),
+    curdao(){
+      return this.$store.state.daoManage.curdao
+    },
+    daoGCBalance(){
+      return this.$store.state.erc20.daoGCBalance
+    },
+    curDaoControlAddress(){
+      if(this.$store.state.daoManage.curDaoControlAddress){
+        return this.$store.state.daoManage.curDaoControlAddress
+      }else{
+        return {}
+      }
+    },
+    departmentList() {
+      return this.$store.state.daoUser.departmentList
+    },
+    curDaoAddress() {
+      return this.$store.state.daoManage.curDaoAddress
+    },
     coinInfo() {
       if (this.$store.state.erc20.coinInfo) {
         return this.$store.state.erc20.coinInfo
@@ -271,9 +376,7 @@ export default {
         return {}
       }
     },
-    curDaoAddress() {
-      return this.$store.state.daoManage.curDaoAddress
-    },
+
     childDaoList() {
       return this.$store.state.daoManage.childDaoList
     }
@@ -303,6 +406,29 @@ export default {
 
   },
   methods: {
+    getSearchResult(type) {
+      switch (type) {
+        case "mother":
+          this.motherSearchName = this.searchData.mother
+          break
+        case "all":
+          this.allSearchName = this.searchData.all
+          break
+        case "alliance":
+          this.allianceSearchName = this.searchData.alliance
+          break
+      }
+    },
+    getSelected() {
+      if (this.selectIndex == 1) {
+        this.category = "union"
+      } else {
+        this.category = "mother"
+      }
+    },
+    chooseChildDao(item) {
+      this.$emit("chooseChildDao", item)
+    },
     createDao(index) {
       this.$router.push({name: "createDao", params: {index}})
     },
@@ -316,25 +442,44 @@ export default {
     },
     listGroup() {
       this.$store.dispatch("daoUser/listGroup", this.curDaoControlAddress.daoUsersAddr).then(res => {
-        console.log(res)
-        this.departmentList = res
+        this.$store.commit("daoUser/SET_DEPARTMENTLIST", res)
       })
     },
     chooseDepartment(item, index) {
       this.$router.push({
         name: "department", params: {
           departmentInfo: item,
-          departmentAddr: index
+          departmentId: index
         }
       })
     },
     addGroup() {
+      const {name, manager} = this.department
+      if (!name) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the name"
+        })
+        return
+      }
+      if (!manager) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input the manager Address"
+        })
+        return
+      }
       this.$store.dispatch("daoUser/addGroup", {
         daoUserAddress: this.curDaoControlAddress.daoUsersAddr,
         department: this.department
       }).then(() => {
         this.isShowAddDepartment = false
 
+      }).catch(err => {
+        eventBus.$emit('message', {
+          type: "error",
+          message: err
+        })
       })
     }
   }
@@ -344,6 +489,37 @@ export default {
 <style lang="scss" scoped>
 .dao-home {
   padding: 30px;
+
+  .search-box {
+    display: flex;
+    .clear-btn{
+      width: 20px;
+      height: 20px;
+      position: relative;
+      left: -60px;
+      top: 10px;
+      z-index: 1;
+      cursor: pointer;
+    }
+    input {
+      width: 252px;
+      height: 40px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 0 10px;
+      border: none;
+      &:focus-visible{
+        outline: none!important;
+      }
+    }
+
+    .search-btn {
+      position: relative;
+      left: -48px;
+      top: 2px;
+
+    }
+  }
 
   .rainbow-dialog {
     .dialog-title {
@@ -382,7 +558,7 @@ export default {
   .part-title-box {
     display: flex;
     justify-content: space-between;
-
+    align-items: center;
     .left {
       display: flex;
       align-items: center;
@@ -397,7 +573,10 @@ export default {
     }
 
     .right {
-      .rainbow-btn {
+      display: flex;
+
+      .rainbow-button {
+        margin-right: 10px;
         width: 120px;
         height: 36px;
         line-height: 36px;

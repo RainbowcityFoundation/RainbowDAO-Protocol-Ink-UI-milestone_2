@@ -41,19 +41,16 @@ const actions = {
         return data
     },
     async getBalance({rootState}, {daoVaultAddr,address}){
-        const AccountId = await Accounts.accountAddress();
+        const AccountId = sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3, daoVaultAddr)
-        console.log(state.contract)
         let data = await state.contract.query.getBalanceOf(AccountId, {value, gasLimit},address)
         data = formatResult(data);
         return data
     },
     async deposit({rootState, dispatch}, {address, erc20Addr,amount}) {
         const injector = await Accounts.accountInjector();
-        const AccountId = await Accounts.accountAddress();
-        dispatch("app/getBalance", address, {root: true}).then(res => {
-            console.log(res)
-        })
+        const AccountId = sessionStorage.getItem('currentAccount')
+        dispatch("app/getBalance", address, {root: true})
         await judgeContract(rootState.app.web3, address)
         if (rootState.app.balance < 1.01) {
             eventBus.$emit('message', {
@@ -62,12 +59,15 @@ const actions = {
             })
             return
         }
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
 
         let data = await state.contract.tx.deposit({
             value,
             gasLimit
         }, erc20Addr,AccountId,amount).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result, "Deposit")
+
+            dealResult(result, "Deposit",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -86,12 +86,13 @@ const actions = {
             })
             return
         }
-
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.withdraw({
             value,
             gasLimit
         }, erc20Addr,AccountId,amount).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result, "Withdraw")
+            dealResult(result, "Withdraw",timeMemory)
         });
         data = formatResult(data);
         return data

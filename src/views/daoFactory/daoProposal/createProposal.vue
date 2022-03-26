@@ -31,15 +31,21 @@
           </div>
           <div class="item">
             <div class="item-title">
+              Proposal pendingTime(block)
+            </div>
+            <input type="number" v-model="form.pendingTime">
+          </div>
+          <div class="item">
+            <div class="item-title">
               Proposal PublicityDelay(block)
             </div>
-            <input type="text" v-model="form.publicityDelay">
+            <input type="number" v-model="form.publicityDelay">
           </div>
           <div class="item">
             <div class="item-title">
               Proposal category(1:Fund management type:2:Contract invocation type,3:Newer code)
             </div>
-            <input type="text" v-model="form.category">
+            <input type="number" v-model="form.category">
           </div>
 
           <div class="btn-box">
@@ -74,6 +80,42 @@ export default {
     createProposal(){
       this.form.transaction={
         calle: this.account,
+      }
+      const { title,desc,publicityDelay,pendingTime, category} = this.form
+      if(!title){
+        this.$eventBus.$emit('message', {
+          message: "Please input title",
+          type: "error"
+        })
+        return
+      }
+      if(!desc){
+        this.$eventBus.$emit('message', {
+          message: "Please input desc",
+          type: "error"
+        })
+        return
+      }
+      if(!publicityDelay||publicityDelay<=2){
+        this.$eventBus.$emit('message', {
+          message: "PublicityDelay should >2",
+          type: "error"
+        })
+        return
+      }
+      if(!pendingTime||pendingTime<=2){
+        this.$eventBus.$emit('message', {
+          message: "pendingTime should >2",
+          type: "error"
+        })
+        return
+      }
+      if(category!=1 && category!=2 && category!=3){
+        this.$eventBus.$emit('message', {
+          message: "category err",
+          type: "error"
+        })
+        return
       }
       this.form.address = this.$store.state.daoManage.curDaoControlAddress.proposalAddr
       this.$store.dispatch("daoProposal/propose",this.form).then(()=>{

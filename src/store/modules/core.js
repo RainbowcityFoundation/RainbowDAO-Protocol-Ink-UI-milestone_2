@@ -33,12 +33,14 @@ const actions = {
             })
             return
         }
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.roleInsertPrivilege({
             value,
             gasLimit
         }, name, privilege).signAndSend(AccountId, {signer: injector.signer}, (result) => {
             console.error(result)
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -54,11 +56,13 @@ const actions = {
             })
             return
         }
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.addPrivilege({
             value,
             gasLimit
         }, name).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -75,11 +79,14 @@ const actions = {
             return
         }
         const AccountId = await Accounts.accountAddress();
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.addRole({
             value,
             gasLimit
         }, name).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -96,11 +103,14 @@ const actions = {
             return
         }
         const AccountId = await Accounts.accountAddress();
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.addRoute({
             value,
             gasLimit
         }, name, routeValue).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -108,6 +118,7 @@ const actions = {
     async changeRoute({rootState}, {name, value}) {
         const injector = await Accounts.accountInjector();
         await judgeContract(rootState.app.web3)
+
         if (rootState.app.balance < 1.01) {
             eventBus.$emit('message', {
                 type: "error",
@@ -116,11 +127,15 @@ const actions = {
             return
         }
         const AccountId = await Accounts.accountAddress();
+
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.changeRoute({
             value,
             gasLimit
         }, name, value).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data

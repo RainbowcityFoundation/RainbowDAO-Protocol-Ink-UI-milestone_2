@@ -95,7 +95,6 @@ export default {
       this.stage += 1
     },
     createDao() {
-
       this.$store.dispatch("daoFactory/initDaoByTemplate",{})
     }
   }

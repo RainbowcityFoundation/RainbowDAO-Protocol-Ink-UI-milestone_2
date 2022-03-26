@@ -7,7 +7,9 @@ const formatResult =  (result) =>{
     }
     return str;
 }
-const dealResult = (result,msg)=>{
+window.messageBox = []
+const dealResult = (result,msg,timeMemory)=>{
+
     if (result.status.isFinalized || result.status.isInBlock) {
         result.events
             .filter(({ event: { section } }) => section === 'system')
@@ -19,22 +21,35 @@ const dealResult = (result,msg)=>{
                             const mod = dispatchError.asModule;
                             const error = data.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
                             console.log("error:", error.name);
-                            eventBus.$emit('message', {
-                                type: "error",
-                                message: error.name
-                            })
+                            if(window.messageBox.indexOf(timeMemory) > -1){
+                                eventBus.$emit('message', {
+                                    type: "error",
+                                    message: error.name
+                                })
+
+                                if (window.messageBox.indexOf(timeMemory) > -1) {
+                                    window.messageBox.splice(window.messageBox.indexOf(timeMemory), 1);
+                                }
+                            }
+
 
                         } catch (error) {
                             console.log(error);
                         }
                     }
                 } else if (method === 'ExtrinsicSuccess') {
-                    console.log('success');
-                    let message = msg?msg + " Success":""
-                    eventBus.$emit('message', {
-                        type: "success",
-                        message
-                    })
+                    let message = msg?msg + " Success":"SUCCESS"
+
+                    if(message&&window.messageBox.indexOf(timeMemory)>-1){
+                        eventBus.$emit('message', {
+                            type: "success",
+                            message
+                        })
+                        if (window.messageBox.indexOf(timeMemory) > -1) {
+                            window.messageBox.splice(window.messageBox.indexOf(timeMemory), 1);
+                        }
+                    }
+
                 }
             });
     } else if (result.isError) {

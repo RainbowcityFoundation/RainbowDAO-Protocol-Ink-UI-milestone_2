@@ -12,25 +12,28 @@
               {{ proposal.state }}
             </div>
             <div class="date">
-              active block:{{ parseInt(proposal.endBlock.toString().replace(',','')) -  parseInt(proposal.publicityDelay.toString().replace(',','')) }} ~{{ proposal.endBlock}}
+              active block:{{
+                parseInt(proposal.endBlock.toString().replace(',', '')) - parseInt(proposal.publicityDelay.toString().replace(',', ''))
+              }} ~{{ proposal.endBlock }}
             </div>
           </div>
         </div>
         <div class="right">
           <div class="title">
-            My votes
+            My
+            votes({{ account ? account.substr(0, 6) + '...' + account.substr(account.length - 3, 3) : "please connect" }})
           </div>
           <div class="number">
             {{ myVotes }}
           </div>
           <div class="btn-box">
-            <div class="support" @click="delegate">
+            <div class="support" @click="isShowDelegate=true">
               delegate
             </div>
-            <div class="support" @click="castVote(true)">
+            <div class="support" @click="castVote(1)">
               Support
             </div>
-            <div class="Refuse" @click="castVote(false)">
+            <div class="Refuse" @click="castVote(0)">
               Refuse
             </div>
           </div>
@@ -49,10 +52,10 @@
             </div>
             <div class="vote-number">
               <div class="number">
-                {{proposal.forVotes}}
+                {{ proposal.forVotes.replace(/,/g, '') / 10**this.coinInfo.decimals }}
               </div>
               <div class="number-line">
-                <div class="active-number">
+                <div class="active-number" :style="'width:' + (proposal.supportArr.length / proposal.receiptsArr.length) * 340 + 'px'">
 
                 </div>
               </div>
@@ -86,10 +89,10 @@
             </div>
             <div class="vote-number">
               <div class="number">
-                {{ proposal.againstVotes }}
+                {{ proposal.againstVotes.replace(/,/g, '') / 10**this.coinInfo.decimals }}
               </div>
               <div class="number-line">
-                <div class="active-number">
+                <div class="active-number" :style="'width:' + (proposal.refuseArr.length / proposal.receiptsArr.length) * 340 + 'px'">
 
                 </div>
               </div>
@@ -126,22 +129,22 @@
                 Establish
               </div>
               <div class="date">
-               {{ proposal.startBlock}} block
+                {{ proposal.startBlock }} block
               </div>
             </div>
-            <div class="step" >
-              <div class="icon"  :class="{'active':statusIndex > 1}">
+            <div class="step">
+              <div class="icon" :class="{'active':statusIndex > 1}">
                 <img src="../../../assets/imgs/right_icon.png" alt="">
               </div>
               <div class="name">
                 Voting period
               </div>
               <div class="date">
-                {{proposal.endBlock }}block
+                {{ proposal.endBlock }}block
               </div>
             </div>
-            <div class="step" >
-              <div class="icon"  :class="{'active':statusIndex > 2}">
+            <div class="step">
+              <div class="icon" :class="{'active':statusIndex > 2}">
                 <img src="../../../assets/imgs/right_icon.png" alt="">
               </div>
               <div class="name">
@@ -151,7 +154,7 @@
 
               </div>
             </div>
-            <div class="step" >
+            <div class="step">
               <div class="icon" :class="{'active':statusIndex > 3}">
                 <img src="../../../assets/imgs/right_icon.png" alt="">
               </div>
@@ -162,8 +165,8 @@
 
               </div>
             </div>
-            <div class="step" >
-              <div class="icon"  :class="{'active':statusIndex > 4}">
+            <div class="step">
+              <div class="icon" :class="{'active':statusIndex > 4}">
                 <img src="../../../assets/imgs/right_icon.png" alt="">
               </div>
               <div class="name">
@@ -181,29 +184,29 @@
           Details
         </div>
         <div class="part3-content">
-          {{proposal.desc}}
+          {{ proposal.desc }}
         </div>
       </div>
     </div>
     <page-footer/>
-    <div class="rainbow-dialog-box"  v-show="isShowMembers">
-      <div class="mask" @click="isShowMembers=false">
-      </div>
+    <div class="rainbow-dialog-box" v-show="isShowMembers">
+      <div class="mask" @click="isShowMembers=false"/>
       <div class="rainbow-dialog" @click.stop>
         <div class="title-box">
           <div class="title">
             All Members
           </div>
           <div class="address">
-            {{ proposal.forVotes }}
+
           </div>
         </div>
         <div class="vote-number">
           <div class="number">
-            {{ proposal.forVotes }}
+            {{ proposal.forVotes.replace(/,/g, '') / 10**this.coinInfo.decimals }}
           </div>
           <div class="number-line">
-            <div class="active-number">
+            <div class="active-number" :style="'width:' + (proposal.supportArr.length / proposal.receiptsArr.length) * 340 + 'px'">
+
 
             </div>
           </div>
@@ -223,69 +226,83 @@
         </div>
       </div>
     </div>
+    <div class="rainbow-dialog-box" v-show="isShowDelegate">
+      <div class="mask" @click="isShowDelegate=false"/>
+      <div class="rainbow-dialog">
+        <div class="title-box">
+          <div class="title" style="font-size: 20px">
+            DELEGATE
+          </div>
+        </div>
+        <div class="input-box">
+          <div class="input-box-title">
+            DELEGATE ADDRESS
+          </div>
+          <div class="select-box">
+            <input type="text" v-model="delegateAddress" placeholder="please input delegateAddress">
+          </div>
+        </div>
+        <div class="rainbow-button" @click="delegate" style="width: 200px;margin-top: 30px;height: 40px">
+          Delegate
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import {mapGetters} from "vuex";
+import {eventBus} from "../../../utils/eventBus";
 
 export default {
   name: "proposalDetail",
-  data(){
-    return{
-      proposal:{
-        endBlock:0,
-        supportArr:[],
-        refuseArr:[],
-        publicityDelay:0
+  data() {
+    return {
+      proposal: {
+        delegateAddress: "",
+        endBlock: 0,
+        supportArr: [],
+        receiptsArr:[],
+        refuseArr: [],
+        publicityDelay: 0
       },
-      isShowMembers:false,
-      statusIndex:0,
-      myVotes:0,
-      blockNumber:0
+      isShowMembers: false,
+      statusIndex: 0,
+      myVotes: 0,
+      blockNumber: 0,
+      isShowDelegate: false
     }
   },
   computed: {
-    ...mapGetters(['account', 'isConnected'])
-  },
-  watch:{
-    isConnected(){
-      this.getData()
+    ...mapGetters(['account', 'isConnected']),
+    coinInfo() {
+      if (this.$store.state.erc20.coinInfo) {
+        return this.$store.state.erc20.coinInfo
+      } else {
+        return {}
+      }
+    },
+
+    curDaoControlAddress() {
+      return this.$store.state.daoManage.curDaoControlAddress
     },
   },
-  mounted() {
-    console.log(this.$route.params)
-    this.proposal = this.$route.params.item
-    this.coinAddress = this.$store.state.daoManage.curDaoControlAddress.erc20Addr
-
-    this.proposal.receiptsArr = []
-    this.proposal.supportArr = []
-    this.proposal.refuseArr = []
-    if(this.proposal.receipts){
-      for(let key in this.proposal.receipts){
-        console.log(key)
-        if(this.proposal.receipts[key]&&this.proposal.receipts[key].votes){
-          this.proposal.receipts[key].votes = (this.proposal.receipts[key].votes.replace(/,/g,''))/10**18
-          this.proposal.receiptsArr.push({
-            address: key,
-            ...this.proposal.receipts[key],
-          })
-          if(this.proposal.receipts[key].support){
-            this.proposal.supportArr.push({
-              address: key,
-              ...this.proposal.receipts[key],
-            })
-          }else{
-            this.proposal.refuseArr.push({
-              address: key,
-              ...this.proposal.receipts[key],
-            })
-          }
-        }
-      }
+  watch: {
+    isConnected() {
+      this.getData()
+    },
+    account() {
+      this.getData()
     }
-    switch (this.proposal.state){
-      case "Active": this.statusIndex = 1
+  },
+  mounted() {
+    this.proposal = this.$route.params.item
+    this.coinAddress = this.curDaoControlAddress.erc20Addr
+
+    this.dealUpdateList()
+    switch (this.proposal.state) {
+      case "Active":
+        this.statusIndex = 1
     }
     this.getData()
     this.$eventBus.$on('message', (message) => {
@@ -296,36 +313,112 @@ export default {
     this.$eventBus.$on('message', () => {
     })
   },
-  methods:{
-    delegate(){
-      this.$store.dispatch("erc20/delegate", {address:this.account,coinAddress:this.coinAddress}).then(res=>{
-        console.log(res)
+  methods: {
+    dealUpdateList(){
+      if (this.proposal.receipts) {
+        this.proposal.receiptsArr = []
+        this.proposal.supportArr = []
+        this.proposal.refuseArr=[]
+        for (let key in this.proposal.receipts) {
+          if (this.proposal.receipts[key] && this.proposal.receipts[key].votes) {
+
+            this.proposal.receipts[key].votes = ((this.proposal.receipts[key].votes).toString().replace(/,/g, '')) / 10**this.coinInfo.decimals
+            this.proposal.receiptsArr.push({
+              address: key,
+              ...this.proposal.receipts[key],
+            })
+            if (this.proposal.receipts[key].support == 1) {
+              this.proposal.supportArr.push({
+                address: key,
+                ...this.proposal.receipts[key],
+              })
+            } else {
+              this.proposal.refuseArr.push({
+                address: key,
+                ...this.proposal.receipts[key],
+              })
+            }
+          }
+        }
+      }
+    },
+    delegate() {
+      if (!this.delegateAddress) {
+        eventBus.$emit('message', {
+          type: "error",
+          message: "Please input delegate address"
+        })
+        return
+      }
+      this.$store.dispatch("erc20/delegate", {
+        address: this.delegateAddress,
+        coinAddress: this.coinAddress
+      }).then(() => {
+        this.isShowDelegate = false
+        this.$eventBus.$on('message', (message) => {
+          if(message&&message=="Delegate Success"){
+            this.getData()
+          }
+        })
+      }).catch(err => {
+        eventBus.$emit('message', {
+          type: "error",
+          message: err
+        })
       })
     },
-    getData(){
-      console.log(this.proposal)
-      this.$store.dispatch("erc20/getPriorVotes",{
-        blockNumber:parseInt(this.proposal.endBlock.toString().replace(',','')) - this.proposal.publicityDelay,
-        coinAddress:this.coinAddress
+    getData() {
+      this.$store.dispatch("erc20/getPriorVotes", {
+        blockNumber: parseInt(this.proposal.endBlock.toString().replace(',', '')) - this.proposal.publicityDelay,
+        coinAddress: this.coinAddress
       })
-      this.$store.dispatch("erc20/getCurrentVotes", this.$store.state.daoManage.curDaoControlAddress.erc20Addr).then(res=>{
-        console.log(res)
-        if(res){
-          res = res.toString().replace(/,/g,'')
-          this.myVotes = res
+      this.$store.dispatch("erc20/getCurrentVotes", this.curDaoControlAddress.erc20Addr).then(res => {
+        if (res) {
+          res = res.toString().replace(/,/g, '')
+          this.myVotes = parseInt(res) / (10 ** this.coinInfo.decimals)
         }
       })
-      this.$store.dispatch("erc20/getBalance", this.$store.state.daoManage.curDaoControlAddress.erc20Addr).then(res=>{
-        console.log(res)
-      })
+
     },
-    castVote(support){
+    getProposalList() {
+      if (this.isConnected && this.curDaoControlAddress) {
+        this.$store.dispatch("daoProposal/listProposals", this.curDaoControlAddress.proposalAddr).then(async res => {
+          for (let i = 0; i < res.length; i++) {
+            await this.$store.dispatch("daoProposal/state", {
+              proposalId: res[i].proposalId,
+              address: this.curDaoControlAddress.proposalAddr
+            }).then(state => {
+              res[i].state = state
+            })
+            if(res[i].proposalId == this.proposal.proposalId){
+              this.proposal = res[i]
+            }
+          }
+          this.dealUpdateList()
+
+          this.$store.commit("daoProposal/SET_PROPOSALLIST",JSON.parse(JSON.stringify(res)))
+        })
+      }
+    },
+    castVote(support) {
+      if(this.proposal.state!="Active"){
+        this.$eventBus.$emit('message', {
+          message: "Proposal state Not Active",
+          type: "error"
+        })
+        return
+      }
       this.$store.dispatch("daoProposal/castVote", {
-        proposalAddress:this.$store.state.daoManage.curDaoControlAddress.proposalAddr,
-        coinAddress:this.coinAddress,
-        proposal_id:this.proposal.proposalId,
+        proposalAddress: this.$store.state.daoManage.curDaoControlAddress.proposalAddr,
+        coinAddress: this.coinAddress,
+        proposal_id: this.proposal.proposalId,
         support
-      }).then(res=>{
+      }).then(() => {
+        this.$eventBus.$on('message', (message) => {
+          if(message.type == "success" && message.message=="Vote Success"){
+              this.getProposalList()
+          }
+        })
       })
     }
   }
@@ -334,7 +427,7 @@ export default {
 
 <style lang="scss" scoped>
 .proposalDetail {
-  .rainbow-dialog{
+  .rainbow-dialog {
     .title-box {
       display: flex;
       justify-content: space-between;
@@ -354,6 +447,25 @@ export default {
       }
     }
 
+    .input-box {
+      margin-top: 20px;
+
+      .input-box-title {
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 30px;
+      }
+
+      input {
+        width: 360px;
+        padding: 0 10px;
+        height: 46px;
+        background: #f5f5f5;
+        border: 1px solid #eaeaea;
+        border-radius: 10px;
+      }
+    }
+
     .vote-number {
       .number {
         font-size: 20px;
@@ -370,7 +482,7 @@ export default {
         border-radius: 2px;
 
         .active-number {
-          width: 320px;
+          width: 0px;
           height: 5px;
           background: #5edba6;
           border-radius: 2px;
@@ -380,6 +492,7 @@ export default {
 
 
   }
+
   .members {
     .member-item {
       display: flex;
@@ -387,6 +500,7 @@ export default {
       padding: 6px 20px 16px 0;
       position: relative;
       margin-top: 10px;
+
       .icon {
         width: 30px;
         height: 30px;
@@ -422,6 +536,7 @@ export default {
       }
     }
   }
+
   .detail-content {
     .part1 {
       display: flex;
@@ -545,9 +660,10 @@ export default {
               border-radius: 50%;
               background: #eee;
 
-              &.active{
+              &.active {
                 background: #5EDBA6;
               }
+
               img {
                 margin: 10%;
                 width: 80%;
@@ -613,7 +729,7 @@ export default {
               border-radius: 2px;
 
               .active-number {
-                width: 320px;
+                width: 0px;
                 height: 5px;
                 background: #5edba6;
                 border-radius: 2px;
@@ -622,7 +738,7 @@ export default {
           }
 
 
-          .more-btn{
+          .more-btn {
             margin-top: 20px;
             margin-left: calc(50% - 40px);
             color: #999999;
@@ -645,12 +761,14 @@ export default {
         }
       }
     }
-    .part3{
 
-      .title{
+    .part3 {
+
+      .title {
 
       }
-      .part3-content{
+
+      .part3-content {
         margin-top: 20px;
         line-height: 20px;
         width: 100%;
