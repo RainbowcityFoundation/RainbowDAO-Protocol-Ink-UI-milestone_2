@@ -135,7 +135,7 @@
                   back
                 </div>
                 <div class="sub-btn" @click="initBase()">
-                  Init Dao Info
+                  Transfer Fee To DAO
                 </div>
               </div>
             </div>
@@ -256,10 +256,10 @@ export default {
         })
         return
       }
-      if (!totalSupply || totalSupply == 0) {
+      if (!totalSupply || totalSupply <= 0) {
         eventBus.$emit('message', {
           type: "error",
-          message: "Please input the totalSupply and totalSupply not 0"
+          message: "Please input the totalSupply and totalSupply > 0"
         })
         return
       }

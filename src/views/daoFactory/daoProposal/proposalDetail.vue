@@ -88,7 +88,7 @@
               </div>
             </div>
             <div class="vote-number">
-              <div class="number">
+              <div class="number" style="color: #ff1a1a">
                 {{ proposal.againstVotes.replace(/,/g, '') / 10**this.coinInfo.decimals }}
               </div>
               <div class="number-line">
@@ -401,6 +401,13 @@ export default {
       }
     },
     castVote(support) {
+      if(this.myVotes==0){
+        this.$eventBus.$emit('message', {
+          message: "you  Votes is 0",
+          type: "error"
+        })
+        return
+      }
       if(this.proposal.state!="Active"){
         this.$eventBus.$emit('message', {
           message: "Proposal state Not Active",
@@ -618,6 +625,7 @@ export default {
           }
 
           .Refuse {
+
             margin-left: 10px;
             background: linear-gradient(90deg, #ff6a6a, #ff1a1a 100%);
             box-shadow: 0px 3px 5px 0px rgba(254, 151, 134, 0.50);

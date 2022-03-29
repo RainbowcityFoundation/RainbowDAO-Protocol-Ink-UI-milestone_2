@@ -171,16 +171,19 @@ export default {
       })
     },
     async chooseChildDao(item) {
+      console.log(item)
       localStorage.setItem("currentDAOInfo",JSON.stringify(item))
-      this.$store.commit("daoManage/SET_CURDAO",item)
       this.$store.commit("daoManage/SET_CURDAOADDR",item.daoManagerAddr)
+      this.$store.commit("daoManage/SET_CURDAO",item)
+      this.$store.commit("daoManage/SET_CATEGORY","child")
       this.getComponentAddrs()
     },
     async chooseDao(item) {
-
+      console.log(item)
       localStorage.setItem("currentDAOInfo",JSON.stringify(item))
       this.$store.commit("daoManage/SET_CURDAOADDR",item.daoManagerAddr)
       this.$store.commit("daoManage/SET_CURDAO",item)
+      this.$store.commit("daoManage/SET_CATEGORY",item.category)
       this.getComponentAddrs()
     },
      getGovernCoinBalance(){
@@ -215,6 +218,9 @@ export default {
     getProposalList() {
       if (this.isConnected && this.curDaoControlAddress) {
         this.$store.dispatch("daoProposal/listProposals", this.curDaoControlAddress.proposalAddr).then(async res => {
+          if(!res){
+            return
+          }
           for (let i = 0; i < res.length; i++) {
             await this.$store.dispatch("daoProposal/state", {
               proposalId: res[i].proposalId,

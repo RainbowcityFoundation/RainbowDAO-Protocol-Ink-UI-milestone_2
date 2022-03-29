@@ -6,6 +6,7 @@ import contractHash from "../../utils/contractHash.json"
 
 const state = {
     curdao: {},
+    category:"",
     memberLength: 0,
     curDaoControlAddress: {},
     curDaoAddress: "",
@@ -22,6 +23,9 @@ async function judgeContract(web3, address) {
 const mutations = {
     SET_CURDAO(state, curdao) {
         state.curdao = curdao
+    },
+    SET_CATEGORY(state, category) {
+        state.category = category
     },
     SET_CURDAOMEMBERS(state, members) {
         state.daoMembers = members

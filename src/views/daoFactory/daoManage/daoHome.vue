@@ -12,6 +12,9 @@
       <div class="address">
         {{ curDaoAddress }}
       </div>
+      <div class="category" style="">
+        <strong>Category</strong>: {{category}}
+      </div>
     </div>
     <div class="part-title-box">
       <div class="left">
@@ -150,7 +153,7 @@
         </div>
       </div>
       <div class="right" v-show="curDaoAddress">
-        <div class="rainbow-btn" @click="createDao(2)" v-if="curdao.category == 'mother'">
+        <div class="rainbow-btn" @click="createDao(2)" v-if="category == 'mother'">
           CREATE
         </div>
       </div>
@@ -376,7 +379,9 @@ export default {
         return {}
       }
     },
-
+    category(){
+      return this.$store.state.daoManage.category
+    },
     childDaoList() {
       return this.$store.state.daoManage.childDaoList
     }
@@ -598,7 +603,10 @@ export default {
         margin-right: 6px;
       }
     }
-
+    .category{
+      font-size: 20px;
+      padding-top: 20px;
+    }
     .number {
       height: 35px;
       font-size: 26px;

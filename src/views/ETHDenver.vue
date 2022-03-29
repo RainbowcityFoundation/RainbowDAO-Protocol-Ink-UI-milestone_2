@@ -23,12 +23,10 @@
       </div>
     </header>
     <div class="content">
-      <div class="title-box">
-        <img src="../assets/Submission.png" alt="">
-      </div>
+
       <div class="link-list">
         <div class="item">
-          <a href="https://daofactoryethdanver.rainbowdao.io" target="_blank">
+          <a href="https://daofactory.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/1@2x.png" alt="">
             <span class="title">
                 1 - Rainbow DAO Factory
@@ -41,7 +39,7 @@
           </div>
         </div>
         <div class="item">
-          <a href="https://nftbankethdanver.rainbowdao.io" target="_blank">
+          <a href="https://daonftbank.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/2@2x.png" alt="">
             <span class="title">
              2 - DAO NFT Bank System
@@ -54,7 +52,7 @@
           </div>
         </div>
         <div class="item">
-          <a href="https://committeeethdanver.rainbowdao.io" target="_blank">
+          <a href="https://committee.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/3@2x.png" alt="">
             <span class="title">
               3 - DAO Multi-Signature Committee
@@ -67,7 +65,7 @@
           </div>
         </div>
         <div class="item">
-          <a href="https://mswalletethdanver.rainbowdao.io" target="_blank">
+          <a href="https://mswallet.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/4@2x.png" alt="">
             <span class="title">
             4 - DAO Multi-Signature Wallet System
@@ -80,11 +78,52 @@
               <img class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
           </div>
         </div>
+
         <div class="item">
-          <a href="https://erc20ethdanver.rainbowdao.io" target="_blank">
+          <a href="https://vault.rainbowdao.io" target="_blank">
+            <img src="../assets/nearImgs/6@2x.png" alt="">
+            <span class="title">
+           5 - DAO Locked Vault System
+            </span>
+          </a>
+          <div class="link-box">
+            <a href="https://youtu.be/YZBzZuV1src" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
+            <a href="https://github.com/RainbowDAO/06-ETHDenver2022-DAO-Locked-Vault.git" target="_blank"> <img
+                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
+          </div>
+        </div>
+        <div class="item">
+          <a href="https://fixedex.rainbowdao.io" target="_blank">
+            <img src="../assets/nearImgs/7@2x.png" alt="">
+            <span class="title">
+             6 - DAO Fixed Exchange System
+            </span>
+          </a>
+          <div class="link-box">
+            <a href="https://youtu.be/LYv_N0KmOsI" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
+            <a href="https://github.com/RainbowDAO/07-ETHDenver2022-DAO-Fixed-Exchange.git" target="_blank"> <img
+                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
+          </div>
+        </div>
+
+        <div class="item">
+          <a href="https://airdrop.rainbowdao.io" target="_blank">
+            <img src="../assets/nearImgs/8@2x.png" alt="">
+            <span class="title">
+            7 - DAO Airdrop System
+            </span>
+          </a>
+          <div class="link-box">
+            <a href="https://youtu.be/7pdamZINrH8" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
+            <a href="https://github.com/RainbowDAO/08-ETHDenver2022-DAO-Airdrop.git" target="_blank"> <img
+                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
+          </div>
+        </div>
+        <div class="item">
+          <a href="https://erc20.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/5@2x.png" alt="">
             <span class="title">
-             5 - DAO ERC20 Factory System
+             8 - DAO ERC20 Factory System
             </span>
 
           </a>
@@ -96,47 +135,7 @@
           </div>
         </div>
         <div class="item">
-          <a href="https://vaultethdanver.rainbowdao.io" target="_blank">
-            <img src="../assets/nearImgs/6@2x.png" alt="">
-            <span class="title">
-           6 - DAO Locked Vault System
-            </span>
-          </a>
-          <div class="link-box">
-            <a href="https://youtu.be/YZBzZuV1src" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
-            <a href="https://github.com/RainbowDAO/06-ETHDenver2022-DAO-Locked-Vault.git" target="_blank"> <img
-                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
-          </div>
-        </div>
-        <div class="item">
-          <a href="https://fixedexethdanver.rainbowdao.io" target="_blank">
-            <img src="../assets/nearImgs/7@2x.png" alt="">
-            <span class="title">
-             7 - DAO Fixed Exchange System
-            </span>
-          </a>
-          <div class="link-box">
-            <a href="https://youtu.be/LYv_N0KmOsI" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
-            <a href="https://github.com/RainbowDAO/07-ETHDenver2022-DAO-Fixed-Exchange.git" target="_blank"> <img
-                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
-          </div>
-        </div>
-
-        <div class="item">
-          <a href="https://airdropethdanver.rainbowdao.io" target="_blank">
-            <img src="../assets/nearImgs/8@2x.png" alt="">
-            <span class="title">
-            8 - DAO Airdrop System
-            </span>
-          </a>
-          <div class="link-box">
-            <a href="https://youtu.be/7pdamZINrH8" target="_blank"> <img class="icon1" src="../assets/nearImgs/youtube4.png" alt=""></a>
-            <a href="https://github.com/RainbowDAO/08-ETHDenver2022-DAO-Airdrop.git" target="_blank"> <img
-                class="icon2" src="../assets/nearImgs/github@2x.png" alt=""></a>
-          </div>
-        </div>
-        <div class="item">
-          <a href="https://expoolethdanver.rainbowdao.io" target="_blank">
+          <a href="https://expool.rainbowdao.io" target="_blank">
             <img src="../assets/nearImgs/9@2x.png" alt="">
             <span class="title">
            9 - DAO Exchange Pool System
@@ -198,6 +197,7 @@ header {
 .link-list {
   display: flex;
   justify-content: center;
+  margin-top: 60px;
   flex-wrap: wrap;
   .item{
     margin: 0 10px;

@@ -397,9 +397,16 @@ export default {
     },
     withdraw() {
       const amount = this.withdrawNumber * (10 ** this.coinInfo.decimals)
+      if(amount <= 0 ){
+        this.$eventBus.$emit('message', {
+          message: "amount should >0",
+          type: "error"
+        })
+        return
+      }
       if(amount > this.daoGCBalance.replace(/,/g, '')){
         this.$eventBus.$emit('message', {
-          message: "Amount not enough",
+          message: "Finance balance not enough",
           type: "error"
         })
         return
@@ -449,9 +456,16 @@ export default {
 
     deposit() {
       const amount = this.depositNumber * (10 ** this.coinInfo.decimals)
+      if(amount <= 0 ){
+        this.$eventBus.$emit('message', {
+          message: "amount should >0",
+          type: "error"
+        })
+        return
+      }
       if(amount > this.myGCBalance.replace(/,/g, '')){
         this.$eventBus.$emit('message', {
-          message: "Amount not enough",
+          message: "You balance not enough",
           type: "error"
         })
         return
