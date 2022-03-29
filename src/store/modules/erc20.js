@@ -3,7 +3,9 @@ import {dealResult, formatResult} from "../../utils/formatUtils"
 import Accounts from "../../api/Account.js";
 import {eventBus} from "../../utils/eventBus"
 const state = {
-    coinInfo: {}
+    coinInfo: {},
+    myGCBalance:0,
+    daoGCBalance:0,
 }
 const value = 0;
 const gasLimit = -1;
@@ -11,22 +13,31 @@ async function  judgeContract(web3,coinAddress){
     if(!coinAddress){
         throw new Error("No Addr")
     }
-    if(!state.contract){
-        state.contract = await connectContract(web3, "erc20",coinAddress)
-    }
+
+    state.contract = await connectContract(web3, "erc20",coinAddress)
 }
 const mutations = {
     SET_COIN(state,coin){
         state.coinInfo = coin
-    }
+    },
+
+    SET_MYGCBALABCE(state,balance){
+        state.myGCBalance = balance
+    },
+    SET_DAOGCBALABCE(state,balance){
+        state.daoGCBalance = balance
+    },
 }
 const actions = {
     async transfer({rootState}, {fromAddr,toAddr,amount}){
         const injector = await Accounts.accountInjector();
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         const txHash = await rootState.app.web3.tx.balances
             .transfer(toAddr, amount)
             .signAndSend(fromAddr, { signer: injector.signer }, (result) => {
-                dealResult(result,"Transfer Fee")
+                dealResult(result,"Transfer Fee",timeMemory)
             });
     },
     async queryInfo({rootState}, coinAddress) {
@@ -45,15 +56,9 @@ const actions = {
         return data
     },
     async getCurrentVotes({rootState},coinAddress) {
-        if(rootState.app.balance < 1.01){
-            eventBus.$emit('message', {
-                type:"error",
-                message:"Not enough gas"
-            })
-            return
-        }
+
         await judgeContract(rootState.app.web3,coinAddress)
-        const AccountId = await Accounts.accountAddress();
+        const AccountId = sessionStorage.getItem('currentAccount')
         let data = await state.contract.query.getCurrentVotes(AccountId, {value, gasLimit}, AccountId)
         data = formatResult(data);
         return data
@@ -62,9 +67,10 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId =  sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3,coinAddress)
-
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.approve( {value, gasLimit},address,"100000000000000000000000000000000").signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result,"Approve")
+            dealResult(result,"Approve", timeMemory)
         });
 
         data = formatResult(data);
@@ -75,17 +81,12 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId =  sessionStorage.getItem('currentAccount')
         await judgeContract(rootState.app.web3,coinAddress)
-        let isSend = false
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.delegate( {value, gasLimit},address).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            console.error(result)
             if (result.status.isInBlock ||result.status.isFinalized) {
-                if(!isSend){
-                    isSend = true
-                    eventBus.$emit('message', {
-                        type:"success",
-                        message:"delegate success"
-                    })
-                }
+                dealResult(result,"Delegate", timeMemory)
 
                 return true
             }
@@ -94,10 +95,15 @@ const actions = {
         data = formatResult(data);
         return data
     },
-
+    async allowance({rootState},{owner,spender,address}){
+        await judgeContract(rootState.app.web3, address)
+        const AccountId = sessionStorage.getItem('currentAccount')
+        let data = await state.contract.query.allowance(AccountId, {value, gasLimit}, owner,spender)
+        data = formatResult(data);
+        return data
+    },
     async getBalance({rootState},address){
         await judgeContract(rootState.app.web3, address)
-        const accountList = await Accounts.accountList();
         const AccountId = sessionStorage.getItem('currentAccount')
         let data = await state.contract.query.balanceOf(AccountId, {value, gasLimit}, AccountId)
         data = formatResult(data);

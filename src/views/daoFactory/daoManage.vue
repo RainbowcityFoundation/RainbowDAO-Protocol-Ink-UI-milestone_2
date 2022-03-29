@@ -19,19 +19,16 @@
           <div class="item" :class="{'active':activeNavIndex==3}" @click="activeNavIndex=3">
             MEMBER
           </div>
-          <!--          <div class="item" :class="{'active':activeNavIndex==4}" @click="activeNavIndex=4">-->
-          <!--            APPLY LIST-->
-          <!--          </div>-->
+
         </div>
-        <daoHome :curDaoControlAddress="curDaoControlAddress" @chooseDao="chooseDao" :dao-address="curDaoAddress"
+        <daoHome  @chooseDao="chooseDao" @chooseChildDao="chooseChildDao"
                  :balance="balance" :dao-list="daoList" v-show="activeNavIndex==0"></daoHome>
         <proposalList :coinAddress="curDaoControlAddress.erc20Addr" :vault="curDaoControlAddress.vaultAddr"
-                      :proposal-list="proposalArr"
+
                       v-show="activeNavIndex==1"></proposalList>
         <daoFinance
                     v-show="activeNavIndex==2"></daoFinance>
-        <daoMember :members-list="membersList" v-show="activeNavIndex==3"></daoMember>
-        <!--        <applyList @getData="getApplyList" :cur-dao="curDao" :list="applyArr" v-show="activeNavIndex==4"></applyList>-->
+        <daoMember  v-show="activeNavIndex==3"></daoMember>
       </div>
     </div>
     <dao-footer></dao-footer>
@@ -45,6 +42,7 @@ import daoHome from "./daoManage/daoHome";
 import applyList from "./daoManage/applyList";
 import {mapGetters} from "vuex";
 import daoFinance from "./daoManage/daoFinance"
+import {eventBus} from "../../utils/eventBus";
 
 export default {
   name: "daoManage",
@@ -58,13 +56,9 @@ export default {
   data() {
     return {
       balance: 0,
-      curDao: {},
       membersLength: 0,
       activeNavIndex: 0,
-      daoList: [],
       applyArr: [],
-      membersList: [],
-      proposalArr: [],
       daoIndexList: [],
     }
   },
@@ -74,6 +68,13 @@ export default {
       'isConnected',
       'account'
     ]),
+    daoList(){
+      return this.$store.state.daoFactory.daoList
+    },
+    curdao(){
+      return this.$store.state.daoManage.curdao
+    },
+
     curDaoAddress(){
       return this.$store.state.daoManage.curDaoAddress
     },
@@ -89,26 +90,34 @@ export default {
     membersLength() {
     },
     isConnected() {
-      this.getData()
+      this.listDao()
+    },
+    account(){
+      this.listDao()
     }
   },
   created() {
-    if (this.$route.params) {
-      if (this.$route.params.activeNavIndex) {
-        this.activeNavIndex = this.$route.params.activeNavIndex
-      }
+    let localStorageCurDao = localStorage.getItem("currentDAOInfo")
+    console.log(localStorageCurDao,this.$route.params)
+    if (this.$route.params.mineDAO) {
+      setTimeout(()=>{
+        this.chooseDao(this.$route.params.mineDAO)
+      },1000)
+    }else if(localStorageCurDao){
+      console.log("CHOOSE HISTORY DAO")
+      setTimeout(()=>{
+        this.chooseDao(JSON.parse(localStorageCurDao))
+      },1000)
     }
-    if(this.$store.state.daoManage.curDaoControlAddress){
-      this.getComponentAddrs()
-    }
-    this.getData()
+
+    this.listDao()
+
     this.$eventBus.$on('message', (message) => {
       if (message.type == 'success') {
         if (message.message == "Join DAO Success") {
           this.listUser()
         }
       }
-      this.listUser()
     })
   },
   methods: {
@@ -118,7 +127,7 @@ export default {
     getVaultBalance(){
       this.$store.dispatch("erc20/getBalanceOf",{
         toAddr:this.curDaoControlAddress.vaultAddr,
-        address: this.curDaoControlAddress.vaultAddr
+        address: this.curDaoControlAddress.erc20Addr
       }).then(balance=>{
         this.$store.commit("daoVault/SET_VAULTBALANCE",balance)
       })
@@ -133,8 +142,8 @@ export default {
     },
     listUser() {
       this.$store.dispatch("daoUser/listUser", this.curDaoControlAddress.daoUsersAddr).then(res => {
-        this.membersList = res
-        this.$store.commit("daoManage/SET_CURDAOMEMBERS", res.length)
+        this.$store.commit("daoManage/SET_CURDAOMEMBERS",res)
+        this.$store.commit("daoManage/SET_CURDAOMEMBERSLENGTH", res.length)
       })
     },
     getDaoBaseInfo(addr){
@@ -142,7 +151,6 @@ export default {
     },
     getBaseInfo() {
       this.$store.dispatch("daoBase/getBaseInfo",this.curDaoControlAddress.baseAddr).then(res => {
-        this.curDao = res
         this.$store.commit("daoManage/SET_CURDAO", res)
       })
     },
@@ -157,17 +165,45 @@ export default {
           this.getProposalList()
           this.getCoinInfo()
           this.getChildsDaos()
+          this.getGovernCoinBalance()
         }
 
       })
     },
-    chooseDao(item) {
-      this.curDao = item
+    async chooseChildDao(item) {
+      console.log(item)
+      localStorage.setItem("currentDAOInfo",JSON.stringify(item))
       this.$store.commit("daoManage/SET_CURDAOADDR",item.daoManagerAddr)
+      this.$store.commit("daoManage/SET_CURDAO",item)
+      this.$store.commit("daoManage/SET_CATEGORY","child")
       this.getComponentAddrs()
-      this.$store.dispatch("app/getBalance", this.curDaoAddress).then(balance => {
-        this.balance = balance
-      })
+    },
+    async chooseDao(item) {
+      console.log(item)
+      localStorage.setItem("currentDAOInfo",JSON.stringify(item))
+      this.$store.commit("daoManage/SET_CURDAOADDR",item.daoManagerAddr)
+      this.$store.commit("daoManage/SET_CURDAO",item)
+      this.$store.commit("daoManage/SET_CATEGORY",item.category)
+      this.getComponentAddrs()
+    },
+     getGovernCoinBalance(){
+       if(this.curDaoControlAddress.erc20Addr){
+         this.$store.dispatch("erc20/getBalanceOf",{
+           toAddr:this.curDaoControlAddress.vaultAddr,
+           address: this.curDaoControlAddress.erc20Addr
+         }).then(balance=>{
+           console.log("SET_DAOGCBALABCE",balance)
+           this.$store.commit("erc20/SET_DAOGCBALABCE",balance)
+         })
+         this.$store.dispatch("erc20/getBalanceOf",{
+           toAddr:this.account,
+           address: this.curDaoControlAddress.erc20Addr
+         }).then(balance=>{
+           console.log("SET_MYGCBALABCE",balance)
+           this.$store.commit("erc20/SET_MYGCBALABCE",balance)
+         })
+       }
+
     },
     getCoinInfo() {
       if(this.curDaoControlAddress.erc20Addr){
@@ -182,6 +218,9 @@ export default {
     getProposalList() {
       if (this.isConnected && this.curDaoControlAddress) {
         this.$store.dispatch("daoProposal/listProposals", this.curDaoControlAddress.proposalAddr).then(async res => {
+          if(!res){
+            return
+          }
           for (let i = 0; i < res.length; i++) {
             await this.$store.dispatch("daoProposal/state", {
               proposalId: res[i].proposalId,
@@ -190,12 +229,15 @@ export default {
               res[i].state = state
             })
           }
-          this.proposalArr = JSON.parse(JSON.stringify(res))
+          this.$store.commit("daoProposal/SET_PROPOSALLIST",JSON.parse(JSON.stringify(res)))
         })
       }
     },
 
     listDao() {
+      if (!this.isConnected) {
+        return
+      }
       this.$store.dispatch("daoFactory/listDao").then(res => {
         res.forEach(async item=>{
           let addrObj = await this.getDaoControlAddr(item.daoManagerAddr)
@@ -210,31 +252,26 @@ export default {
           }
         })
 
-        this.daoList = res
+        this.$store.commit("daoFactory/SET_DAOLIST",res)
+      })
+    },
 
-      })
-    },
-    joinedDao() {
-      // this.$store.dispatch("daoFactory/joinedDao").then(res => {
-      //   this.daoIndexList = res
-      //   console.log(res)
-      //
-      // })
-    },
     getChildsDaos(){
-      this.$store.dispatch("daoManage/getChildsDaos",this.curDaoAddress).then(res=>{
-        this.$store.commit("daoManage/SET_CHILDDAOLIST",res)
+      this.$store.dispatch("daoManage/getChildsDaos",this.curDaoAddress).then(childaos=>{
+        let childaoArr = []
+        if(childaos&&childaos.length>0){
+          for (let i=0;i<childaos.length; i++){
+            this.$store.dispatch("daoManage/getComponentAddress", childaos[i]).then(addressObj => {
+              if(addressObj){
+                this.$store.dispatch("daoBase/getBaseInfo",addressObj.baseAddr).then(res => {
+                  childaoArr.push({...res,daoManagerAddr:childaos[i]})
+                })
+              }
+            })
+          }
+        }
+        this.$store.commit("daoManage/SET_CHILDDAOLIST",childaoArr)
       })
-    },
-    getData() {
-      if (!this.isConnected) {
-        return
-      }
-      this.listDao()
-      this.joinedDao()
-      if (this.curDao.manage) {
-        this.getProposalList()
-      }
     }
   }
 }

@@ -8,21 +8,14 @@
             <div class="nav-item"  :class="{'active': 0 == activeNavIndex}" @click="activeNavIndex=0">
               HOME
             </div>
-<!--            <div class="nav-item"  :class="{'active': 1 == activeNavIndex}" @click="activeNavIndex=1">-->
-<!--              PROPOSAL-->
-<!--            </div>-->
-<!--            <div class="nav-item"  :class="{'active': 2 == activeNavIndex}" @click="activeNavIndex=2">-->
-<!--              FINANCIAL-->
-<!--            </div>-->
             <div class="nav-item"  :class="{'active': 3 == activeNavIndex}" @click="activeNavIndex=3">
-              MEMBER
+              DEPARTMENT MEMBER
             </div>
           </div>
-          <departmentHome @chooseDao="chooseDao" :dao-list="daoList" v-show="activeNavIndex==0"></departmentHome>
+          <departmentHome @joinDepartment="joinDepartment" :departmentInfo="departmentInfo" v-show="activeNavIndex==0"></departmentHome>
           <proposalList :address="curDao.manage" :vault="curDao.vault" :proposal-list="proposalArr" v-show="activeNavIndex==1"></proposalList>
           <departmentFinance :token-list="tokenList" v-show="activeNavIndex==2"></departmentFinance>
           <departmentMember :members-list="membersList" v-show="activeNavIndex==3"></departmentMember>
-<!--          <applyList @getData="getApplyList" :cur-dao="curDao" :list="applyArr" v-show="activeNavIndex==4"></applyList>-->
         </div>
       </div>
     <dao-footer></dao-footer>
@@ -36,6 +29,7 @@ import departmentHome from "./department/departmentHome";
 // import applyList from "./department/applyList";
 import {mapGetters} from "vuex";
 import departmentFinance from "./department/departmentFinance"
+import {eventBus} from "../../utils/eventBus";
 
 export default {
   name: "department",
@@ -47,6 +41,7 @@ export default {
   },
   data() {
     return {
+      departmentInfo:{},
       curDao: {},
       membersLength: 0,
       activeNavIndex: 0,
@@ -55,28 +50,73 @@ export default {
       applyArr: [],
       membersList: [],
       proposalArr: [],
-      daoIndexList:[]
+      daoIndexList:[],
+      departmentId:null
     }
   },
   created() {
     console.log( this.$route.params)
     this.membersList = this.$route.params.departmentInfo.users
+    this.departmentInfo = this.$route.params.departmentInfo
+    this.departmentId = this.$route.params.departmentId
   },
   computed: {
     ...mapGetters([
       'isConnected',
       'account'
     ]),
+    departmentList() {
+      return this.$store.state.daoUser.departmentList
+    },
+    curDaoControlAddress(){
+      if(this.$store.state.daoManage.curDaoControlAddress){
+        return this.$store.state.daoManage.curDaoControlAddress
+      }else{
+        return {}
+      }
+    },
   },
   methods: {
+    listGroup() {
+      this.$store.dispatch("daoUser/listGroup", this.curDaoControlAddress.daoUsersAddr).then(res => {
+        this.$store.commit("daoUser/SET_DEPARTMENTLIST", res)
+        res.forEach(item=>{
+          console.log(item)
+          if(item.id == this.departmentInfo.id){
+            this.$set(this.departmentInfo,{...this.departmentInfo,users:item.users})
+          }
+        })
+      })
+    },
+    joinDepartment(){
+      for (const address in  this.membersList) {
+        if(address == sessionStorage.getItem("currentAccount")){
+          eventBus.$emit('message', {
+            type:"error",
+            message:"You has joined this Department"
+          })
+          return
+        }
+      }
+      this.$store.dispatch("daoUser/joinGroup", {
+        address:this.curDaoControlAddress.daoUsersAddr,
+        id: this.departmentInfo.id
+      }).then(()=>{
+        this.$eventBus.$on('message', (message) => {
+          if (message.type == "success" && message.message == "Join Department Success") {
+            this.listGroup()
+          }
+        })
+      })
+    },
     getBalance(){
       this.$store.dispatch("app/getBalance", this.curDaoAddress).then(balance => {
-        console.log(balance)
         this.balance = balance
       })
     },
-    joinDao() {
 
+    joinDao() {
+      this.$store.dispatch("daoUser/join", this.curDaoControlAddress.daoUsersAddr)
     },
   }
 }

@@ -71,7 +71,7 @@ import {mapGetters} from "vuex";
 
 export default {
   name: "proposalList",
-  props: ["proposalList", "vault", "coinAddress"],
+  props: [ "vault", "coinAddress"],
   data() {
     return {
       activeIndex: "ALL",
@@ -107,7 +107,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['account', 'isConnected'])
+    ...mapGetters(['account', 'isConnected']),
+    proposalList(){
+      return this.$store.state.daoProposal.proposalList
+    },
   },
   created() {
     console.log(this.proposalList)

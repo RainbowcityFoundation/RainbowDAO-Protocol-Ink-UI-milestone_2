@@ -1,5 +1,5 @@
 import connectContract from "../../api/connectContract"
-import {dealResult, formatResult} from "../../utils/formatUtils"
+import { formatResult} from "../../utils/formatUtils"
 import Accounts from "../../api/Account.js";
 import contractHash from "../../utils/contractHash.json"
 import {eventBus} from "../../utils/eventBus";

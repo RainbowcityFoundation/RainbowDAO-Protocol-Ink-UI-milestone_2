@@ -1,7 +1,17 @@
 <template>
   <div class="daoFinance">
-    <div class="opera-btn">
-      <div class="rainbow-button" @click="isShowDeposit=true">
+    <div class="no-account" style="margin: 20px 60px;font-size: 20px" v-show="!account">
+      Please connect first
+    </div>
+    <div class="opera-btn" v-show="account">
+      <div class="my-GCCoin-balance">
+        My Governance coin balance:
+        <strong>
+          {{ myGCBalance? parseInt(myGCBalance.replace(/,/g, '')) / 10 ** parseInt(coinInfo.decimals) : 0 }}
+          {{ coinInfo.name }}(decimal:{{coinInfo.decimals}})
+        </strong>
+      </div>
+      <div class="rainbow-button" @click=" allowance(),isShowDeposit=true">
         Deposit
       </div>
       <div class="rainbow-button" @click="isShowWithdraw=true">
@@ -9,7 +19,6 @@
       </div>
     </div>
     <div class="finance-box">
-
       <div class="left">
         <div class="coin-list">
           <div class="item">
@@ -19,7 +28,7 @@
                 Total income
               </div>
               <div class="number">
-                {{ income }} {{ coinInfo.name }}
+                {{ parseInt(income) / 10 ** parseInt(coinInfo.decimals) }} {{ coinInfo.name }}
               </div>
             </div>
           </div>
@@ -30,7 +39,7 @@
                 Used
               </div>
               <div class="number">
-                {{ expenditure }} {{ coinInfo.name }}
+                {{ parseInt(expenditure) / 10 ** parseInt(coinInfo.decimals) }} {{ coinInfo.name }}
               </div>
             </div>
           </div>
@@ -41,18 +50,20 @@
                 Remaining
               </div>
               <div class="number">
-                {{ vaultBalance }} {{ coinInfo.symbol }}
+                {{ daoGCBalance? parseInt(daoGCBalance.replace(/,/g, '')) / 10 ** parseInt(coinInfo.decimals) :0}} {{ coinInfo.name }}
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="right">
-        <canvas id='chart' width="1508" height="500"></canvas>
-        <div id='chartjs-tooltip'>
-          <div id='chartjs-tooltip__text'></div>
+        <div class="table-title" style="line-height: 20px;padding: 0">
+          AMOUNT CHANGE
         </div>
-
+        <canvas id='chart' width="1008" height="490" style="width: 1000px!important;"></canvas>
+<!--        <div id='chartjs-tooltip'>-->
+<!--          <div id='chartjs-tooltip__text'></div>-->
+<!--        </div>-->
       </div>
     </div>
     <div class="finance-detail">
@@ -77,8 +88,12 @@
             {{ new Date(item.transferTime.replace(/,/g, '') * 1) }}
           </div>
           <div class="value">
-            <div class="income" v-if="item.transferDirection=='2'">{{ item.value }} {{ coinInfo.symbol }}</div>
-            <div class="expenditure" v-if="item.transferDirection=='1'">{{ item.value }} {{ coinInfo.symbol }}</div>
+            <div class="income" v-if="item.transferDirection=='2'">
+              {{ parseInt(item.value.replace(/,/g, '')) / 10 ** parseInt(coinInfo.decimals) }} {{ coinInfo.symbol }}
+            </div>
+            <div class="expenditure" v-if="item.transferDirection=='1'">
+              {{ parseInt(item.value.replace(/,/g, '')) / 10 ** parseInt(coinInfo.decimals) }} {{ coinInfo.symbol }}
+            </div>
           </div>
         </div>
       </div>
@@ -92,10 +107,10 @@
           Deposit
         </div>
         <input type="text" v-model="depositNumber">
-        <div class="rainbow-button" @click="approve">
+        <div class="rainbow-button" @click="approve" v-show="allowanceNumber<1000">
           Approve
         </div>
-        <div class="rainbow-button" @click="deposit">
+        <div class="rainbow-button" @click="deposit" >
           Submit
         </div>
       </div>
@@ -119,12 +134,12 @@
 </template>
 
 <script>
-
-import {mapGetters} from "_vuex@3.6.2@vuex";
-
+import {mapGetters} from "vuex";
 export default {
   name: "daoFinance",
+  components:{
 
+  },
   data() {
     return {
       isShowWithdraw: false,
@@ -133,6 +148,8 @@ export default {
         address: "",
         value: 10
       }],
+      isReady:false,
+      allowanceNumber:0,
       income: 0,
       expenditure: 0,
       depositNumber: 0,
@@ -141,7 +158,7 @@ export default {
         responsive: true
       },
       datacollection: null,
-      chartData:[]
+      chartData: []
     }
   },
   computed: {
@@ -149,8 +166,11 @@ export default {
       'isConnected',
       'account'
     ]),
-    vaultBalance() {
-      return this.$store.state.daoVault.vaultBalance
+    myGCBalance() {
+      return this.$store.state.erc20.myGCBalance
+    },
+    daoGCBalance() {
+      return this.$store.state.erc20.daoGCBalance
     },
     transferList() {
       return this.$store.state.daoVault.transferList
@@ -170,51 +190,58 @@ export default {
     },
   },
   watch: {
+    account() {
+      this.getGovernCoinBalance()
+    },
     transferList() {
-      this.income = 0, this.expenditure = 0
-      this.chartData = []
-      let balance=0
-      this.transferList.forEach(item => {
-        this.chartData.push(balance)
-        if (item.transferDirection == '2') {
-          this.income += parseInt(item.value)
-          balance += parseInt(item.value)
-        } else {
-          this.expenditure += parseInt(item.value)
-          balance -= parseInt(item.value)
-        }
-      })
-      this.initChart()
+      this.dealTransferList()
     }
   },
   mounted() {
     this.fillData()
-    this.income = 0, this.expenditure = 0
-    let balance=0
-    this.transferList.forEach(item => {
-      this.chartData.push(balance)
-      if (item.transferDirection == '2') {
-        this.income += parseInt(item.value)
-        balance += parseInt(item.value)
-      } else {
-        this.expenditure += parseInt(item.value)
-        balance -= parseInt(item.value)
-      }
-    })
-    this.initChart()
+    this.getTransferHistory()
+    this.dealTransferList()
+
+    setTimeout(()=>{
+      this.dealTransferList()
+    },5000)
   },
   methods: {
-    initChart(){
+    dealTransferList() {
+      this.income = 0, this.expenditure = 0
+      this.chartData = []
+      let balance = 0
+      let arr = JSON.parse(JSON.stringify(this.transferList))
+      arr.reverse()
+      this.chartData.push(balance)
+
+      arr.forEach(item => {
+        if (item.transferDirection == '2') {
+          this.income += parseInt(item.value.replace(/,/g, ''))
+          balance += parseInt(item.value.replace(/,/g, ''))
+        } else {
+          this.expenditure += parseInt(item.value.replace(/,/g, ''))
+          balance -= parseInt(item.value.replace(/,/g, ''))
+        }
+        this.chartData.push(balance / 10**this.coinInfo.decimals)
+      })
+
+      this.initChart()
+    },
+    initChart() {
+      if(!document.getElementById('chart')){
+        return
+      }
       let canvas = document.getElementById('chart'),
           ctx = canvas.getContext('2d'),
           grad = ctx.createLinearGradient(0, 0, 0, window.innerHeight)
 
-// Create a background gradient.
+      // Create a background gradient.
       grad.addColorStop(0, 'rgba(71, 34, 96, .7)')
       grad.addColorStop(.9, 'rgba(44, 51, 233, .7)')
       grad.addColorStop(1, 'rgba(44, 51, 233, .7)')
 
-// Create a shadow line.
+      // Create a shadow line.
       let shadowLine = Chart.controllers.line.extend({
         initialize: function () {
           Chart.controllers.line.prototype.initialize.apply(this, arguments)
@@ -232,11 +259,15 @@ export default {
         }
       })
       Chart.controllers.shadowLine = shadowLine
-      let dummyData = this.chartData;
+      let labels= [], dummyData = this.chartData;
+      dummyData.forEach(number=>{
+        labels.push('')
+
+      })
       let chart = new Chart(ctx, {
         type: 'shadowLine',
         data: {
-          labels: ['', 'SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI'],
+          labels: labels,
           datasets: [{
             label: '',
             backgroundColor: grad,
@@ -274,7 +305,7 @@ export default {
                 borderDash: [5, 2]
               },
               ticks: {
-                padding: 16
+                padding: 0
               }
             }],
             yAxes: [{
@@ -283,11 +314,11 @@ export default {
                 borderDash: [5, 2]
               },
               ticks: {
-                min: 0,
-                suggestedMax: Math.max.apply(null, dummyData) + this.vaultBalance/7,
+                min: Math.min.apply(null,dummyData),
+                suggestedMax: Math.max.apply(null, dummyData) + parseInt(this.myGCBalance) / (10 ** this.coinInfo.decimals)/ 10,
                 // Include a dollar sign in the ticks
                 callback: function (value, index, values) {
-                  return '$' + value + '     '
+                  return value + '     '
                 }
               }
             }]
@@ -326,7 +357,7 @@ export default {
                 // Display, position, and set styles for font
                 tooltipEl.className += ' active'
                 tooltipEl.style.top = tooltipModel.caretY - 34 + 'px'
-                tooltipEl.style.height = position.height - tooltipModel.caretY + 'px'
+                tooltipEl.style.height = position.height - tooltipModel.caretY  + 'px'
                 tooltipElText.style.width = tooltipModel.width + 'px'
                 tooltipEl.style.left = position.left + tooltipModel.caretX + 'px'
 
@@ -338,7 +369,7 @@ export default {
 
                 for (let i = 0; i < bodyLines.length; i++) {
                   var body = bodyLines[i]
-                  tooltipElText.innerHTML += '$' + body
+                  tooltipElText.innerHTML += body
                 }
               }
             }
@@ -356,28 +387,108 @@ export default {
       this.$store.dispatch("erc20/approve", {
         address: this.curDaoControlAddress.vaultAddr,
         coinAddress: this.curDaoControlAddress.erc20Addr
+      }).then(()=>{
+        this.$eventBus.$on('message', (message) => {
+          if (message.type == "success" && message.message == "Approve Success") {
+             this.allowance()
+          }
+        })
       })
     },
     withdraw() {
+      const amount = this.withdrawNumber * (10 ** this.coinInfo.decimals)
+      if(amount <= 0 ){
+        this.$eventBus.$emit('message', {
+          message: "amount should >0",
+          type: "error"
+        })
+        return
+      }
+      if(amount > this.daoGCBalance.replace(/,/g, '')){
+        this.$eventBus.$emit('message', {
+          message: "Finance balance not enough",
+          type: "error"
+        })
+        return
+      }
       this.$store.dispatch("daoVault/withdraw", {
         address: this.curDaoControlAddress.vaultAddr,
         erc20Addr: this.curDaoControlAddress.erc20Addr,
-        amount: this.withdrawNumber
+        amount
       }).then(() => {
-        this.getTransferHistory()
-        this.isShowWithdraw = false
+        this.$eventBus.$on('message', (message) => {
+          if (message.type == "success" && message.message == "Withdraw Success") {
+            this.getGovernCoinBalance()
+            this.getTransferHistory()
+            this.isShowWithdraw = false
+          }
+        })
+
       }).catch(err => {
         alert(err)
       })
     },
+    getGovernCoinBalance() {
+      if (this.curDaoControlAddress.erc20Addr) {
+        this.$store.dispatch("erc20/getBalanceOf", {
+          toAddr: this.curDaoControlAddress.vaultAddr,
+          address: this.curDaoControlAddress.erc20Addr
+        }).then(balance => {
+          this.$store.commit("erc20/SET_DAOGCBALABCE", balance)
+        })
+        this.$store.dispatch("erc20/getBalanceOf", {
+          toAddr: this.account,
+          address: this.curDaoControlAddress.erc20Addr
+        }).then(balance => {
+          this.$store.commit("erc20/SET_MYGCBALABCE", balance)
+        })
+      }
+
+    },
+    allowance(){
+      this.$store.dispatch("erc20/allowance",{
+        address:this.curDaoControlAddress.erc20Addr,
+        owner:this.account,spender:this.curDaoControlAddress.vaultAddr
+      }).then(res=>{
+        this.allowanceNumber = res.replace(/,/g, '')
+      })
+    },
+
     deposit() {
+      const amount = this.depositNumber * (10 ** this.coinInfo.decimals)
+      if(amount <= 0 ){
+        this.$eventBus.$emit('message', {
+          message: "amount should >0",
+          type: "error"
+        })
+        return
+      }
+      if(amount > this.myGCBalance.replace(/,/g, '')){
+        this.$eventBus.$emit('message', {
+          message: "You balance not enough",
+          type: "error"
+        })
+        return
+      }
+      if(this.allowanceNumber < amount){
+        this.$eventBus.$emit('message', {
+          message: "Please Approve first",
+          type: "error"
+        })
+        return
+      }
       this.$store.dispatch("daoVault/deposit", {
         address: this.curDaoControlAddress.vaultAddr,
         erc20Addr: this.curDaoControlAddress.erc20Addr,
-        amount: this.depositNumber
+        amount:amount
       }).then(() => {
-        this.getTransferHistory()
         this.isShowDeposit = false
+        this.$eventBus.$on('message', (message) => {
+          if (message.type == "success" && message.message == "Deposit Success") {
+            this.getTransferHistory()
+            this.getGovernCoinBalance()
+          }
+        })
       }).catch(err => {
         alert(err)
       })
@@ -467,6 +578,11 @@ body {
   .opera-btn {
     padding: 30px;
     display: flex;
+
+    .my-GCCoin-balance {
+      font-size: 20px;
+      line-height: 50px;
+    }
 
     .rainbow-button {
       margin-left: 30px;

@@ -39,10 +39,11 @@ const actions = {
             })
             return
         }
-        const AccountId = await Accounts.accountAddress();
-
+        const AccountId = sessionStorage.getItem('currentAccount')
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.propose({value, gasLimit},title,desc,transaction ).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data

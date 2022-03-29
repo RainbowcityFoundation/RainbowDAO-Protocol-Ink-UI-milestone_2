@@ -6,10 +6,12 @@ import contractHash from "../../utils/contractHash.json"
 
 const state = {
     curdao: {},
+    category:"",
     memberLength: 0,
     curDaoControlAddress: {},
     curDaoAddress: "",
-    childDaoList:[]
+    childDaoList:[],
+    daoMembers:[]
 }
 const value = 0;
 const gasLimit = -1;
@@ -22,7 +24,13 @@ const mutations = {
     SET_CURDAO(state, curdao) {
         state.curdao = curdao
     },
-    SET_CURDAOMEMBERS(state, memberLength) {
+    SET_CATEGORY(state, category) {
+        state.category = category
+    },
+    SET_CURDAOMEMBERS(state, members) {
+        state.daoMembers = members
+    },
+    SET_CURDAOMEMBERSLENGTH(state, memberLength) {
         state.memberLength = memberLength
     },
     SET_curDaoControlAddress(state, curDaoControlAddress) {
@@ -41,7 +49,7 @@ const actions = {
 
         await judgeContract(rootState.app.web3, daoManagerAddr)
 
-        let data = await state.contract.query.getChildsDaos(AccountId, {value, gasLimit})
+        let data = await state.contract.query.getChildsDaos(AccountId, {value, gasLimit},daoManagerAddr)
         data = formatResult(data);
         return data
     },
@@ -77,11 +85,15 @@ const actions = {
             })
             return
         }
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.initByParams({
             value,
             gasLimit
         }, params.base.logo, params.base.name, params.base.desc, params.erc20.totalSupply, params.erc20.tokenName, params.erc20.symbol, params.erc20.decimals, params.erc20.owner, parseInt(2), contractHash.dao_base, contractHash.erc20_code_hash, contractHash.dao_user, contractHash.dao_setting, contractHash.dao_vault, contractHash.dao_proposal).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result, "Init DAO Info")
+            dealResult(result, "Init DAO Info",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -99,26 +111,34 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3, address)
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.creatTransfer({
             value,
             gasLimit
         }, to, amount).signAndSend(AccountId, {signer: injector.signer}, (result) => {
             dealResult(result)
         });
-        data = formatResult(data);
+        data = formatResult(data,"",timeMemory);
         return data
     },
     async signTransaction({rootState}, {transaction_id, address}) {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3, address)
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.signTransaction({
             value,
             gasLimit
         }, transaction_id).signAndSend(AccountId, {signer: injector.signer}, (result) => {
             dealResult(result)
         });
-        data = formatResult(data);
+        data = formatResult(data,"",timeMemory);
         return data
     },
     async getTransaction({rootState}, trans_id) {
@@ -132,11 +152,15 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3, address)
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.addManage({
             value,
             gasLimit
         }, addr).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -146,11 +170,14 @@ const actions = {
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3, address)
 
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.removeManage({
             value,
             gasLimit
         }, addr).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result)
+            dealResult(result,"", timeMemory)
         });
         data = formatResult(data);
         return data
@@ -175,11 +202,14 @@ const actions = {
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3, address)
 
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.createChildDao({
             value,
             gasLimit
         }, address, childAddr).signAndSend(AccountId, {signer: injector.signer}, (result) => {
-            dealResult(result,"childDao has init")
+            dealResult(result,"childDao has init", timeMemory)
         });
         data = formatResult(data);
         return data

@@ -1,7 +1,7 @@
 <template>
   <div class="connectWallet">
     <button @click="showWallet" v-show="account.length>1" class="rainbow-btn button-connect">
-      {{ account.substr(0, 6) + '...' + account.substr(39, 3) }}
+      {{ account.substr(0, 6) + '...' + account.substr(account.length-3, 3) }}
     </button>
     <button size="mini" @click="showWallet" v-show="account.length<1" class="rainbow-btn button-connect">
       connect

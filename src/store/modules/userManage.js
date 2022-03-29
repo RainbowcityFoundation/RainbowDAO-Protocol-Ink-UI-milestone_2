@@ -51,9 +51,10 @@ const actions = {
          await judgeContract(rootState.app.web3)
 
         const AccountId = await Accounts.accountAddress();
-
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.join({value, gasLimit},invitation_code,name,user_profile).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data

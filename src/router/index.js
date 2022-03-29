@@ -15,8 +15,8 @@ const routes = [
         component: () => import('@/views/nearHackathon.vue'),
     },
     {
-        path: '/ETHDanver2022',
-        name: "ETHDanver2022",
+        path: '/project',
+        name: "Project",
         component: () => import('@/views/ETHDenver.vue'),
     },
     {

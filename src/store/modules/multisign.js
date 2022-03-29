@@ -29,8 +29,12 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3,address)
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
+
         let data = await state.contract.tx.creatTransfer( {value, gasLimit},to , amount).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result)
+            dealResult(result,"", timeMemory)
         });
         data = formatResult(data);
         return data
@@ -39,9 +43,11 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3,address)
+
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.signTransaction({value, gasLimit},transaction_id).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            console.error(result)
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
@@ -58,8 +64,10 @@ const actions = {
         const injector = await Accounts.accountInjector();
         const AccountId = await Accounts.accountAddress();
         await judgeContract(rootState.app.web3,address)
+        const timeMemory = new Date().getTime()
+        window.messageBox.push(timeMemory)
         let data = await state.contract.tx.addManage( {value, gasLimit},addr).signAndSend(AccountId, { signer: injector.signer }, (result) => {
-            dealResult(result)
+            dealResult(result,"",timeMemory)
         });
         data = formatResult(data);
         return data
