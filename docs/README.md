@@ -120,9 +120,10 @@ Select the initialization function call, fill in the initialization parameters, 
 
 ![](./setupAndConfig/5.jpg)
 
-Deploy govnance_dao you should choose a token as covernance token.
 
-![](./setupAndConfig/6.jpg)
+Deploy. Order(erc20 > dao_category > dao_proposal > dao_setting > dao_users > dao_vault > template_manager  > dao_manager > dao_factory)
+
+![](./setupAndConfig/deploy1.png)
 
 # Setup RainbowDao Protocol Front-end
 
