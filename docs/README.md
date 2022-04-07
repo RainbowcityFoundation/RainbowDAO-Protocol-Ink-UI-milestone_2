@@ -125,6 +125,21 @@ Deploy. Order(erc20 > dao_category > dao_proposal > dao_setting > dao_users > da
 
 ![](./setupAndConfig/deploy1.png)
 
+Contracts that need to pass parameters during deployment.
+
+- erc20
+![](./setupAndConfig/deploy_erc20.png)
+- dao_proposal
+![](./setupAndConfig/deploy_proposal.png)
+- dao_setting
+![](./setupAndConfig/deploy_setting.png)
+- dao_users
+![](./setupAndConfig/deploy_users.png) 
+- template_manager
+![](./setupAndConfig/deploy_template.png)
+- dao_manager
+![](./setupAndConfig/deploy_manager.png)
+
 # Setup RainbowDao Protocol Front-end
 
 ## Install `Polkadot JS Extension`
